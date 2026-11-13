@@ -27,11 +27,11 @@
       transition: transform 0.08s cubic-bezier(0.1, 0.9, 0.2, 1);
     }
 
-    /* Box dimensions: W: 250px, H: 445px, D: 250px (Scale ratio ~1 : 1.78) */
+    /* Box dimensions: W: 250px, H: 450px, D: 250px (Scale ratio 1 : 1.8) */
     .box-container {
       position: relative;
       width: 250px;
-      height: 445px;
+      height: 450px;
       transform-style: preserve-3d;
       margin: 0 auto;
     }
@@ -44,10 +44,11 @@
       background-position: center;
       background-repeat: no-repeat;
       backface-visibility: hidden;
+      -webkit-backface-visibility: hidden;
       box-shadow: inset 0 0 25px rgba(0,0,0,0.06);
       border-radius: 1.5px;
       image-rendering: -webkit-optimize-contrast;
-      image-rendering: crisp-edges;
+      image-rendering: high-quality;
     }
 
     /* Subtle paper edge highlight */
@@ -71,36 +72,34 @@
     /* 6 Faces Geometry */
     .face-front {
       width: 250px;
-      height: 445px;
+      height: 450px;
       margin-left: -125px;
-      margin-top: -222.5px;
+      margin-top: -225px;
       transform: rotateY(0deg) translateZ(125px);
     }
 
     .face-back {
       width: 250px;
-      height: 445px;
+      height: 450px;
       margin-left: -125px;
-      margin-top: -222.5px;
+      margin-top: -225px;
       transform: rotateY(180deg) translateZ(125px);
     }
 
     .face-right {
       width: 250px;
-      height: 445px;
+      height: 450px;
       margin-left: -125px;
-      margin-top: -222.5px;
+      margin-top: -225px;
       transform: rotateY(90deg) translateZ(125px);
-      overflow: hidden;
     }
 
     .face-left {
       width: 250px;
-      height: 445px;
+      height: 450px;
       margin-left: -125px;
-      margin-top: -222.5px;
+      margin-top: -225px;
       transform: rotateY(-90deg) translateZ(125px);
-      overflow: hidden;
     }
 
     .face-top-wrapper {
@@ -112,7 +111,7 @@
       margin-left: -125px;
       margin-top: -125px;
       transform-style: preserve-3d;
-      transform: rotateX(90deg) translateZ(222.5px);
+      transform: rotateX(90deg) translateZ(225px);
     }
 
     .face-top {
@@ -133,7 +132,7 @@
       height: 250px;
       margin-left: -125px;
       margin-top: -125px;
-      transform: rotateX(-90deg) translateZ(222.5px);
+      transform: rotateX(-90deg) translateZ(225px);
     }
 
     /* Floor Shadow */
@@ -141,11 +140,11 @@
       position: absolute;
       left: 50%;
       top: 50%;
-      width: 350px;
-      height: 350px;
-      margin-left: -175px;
-      margin-top: -175px;
-      transform: rotateX(90deg) translateZ(-230px);
+      width: 360px;
+      height: 360px;
+      margin-left: -180px;
+      margin-top: -180px;
+      transform: rotateX(90deg) translateZ(-232px);
       background: radial-gradient(ellipse at center, rgba(15, 10, 5, 0.45) 0%, rgba(20, 15, 10, 0.2) 35%, rgba(0,0,0,0.03) 60%, transparent 75%);
       filter: blur(16px);
       pointer-events: none;
@@ -155,32 +154,14 @@
       position: absolute;
       left: 50%;
       top: 50%;
-      width: 520px;
-      height: 520px;
-      margin-left: -260px;
-      margin-top: -260px;
-      transform: rotateX(90deg) translateZ(-233px);
+      width: 530px;
+      height: 530px;
+      margin-left: -265px;
+      margin-top: -265px;
+      transform: rotateX(90deg) translateZ(-235px);
       border-radius: 50%;
       background: radial-gradient(circle, rgba(255,255,255,0.7) 0%, rgba(245,245,250,0.35) 55%, transparent 72%);
       pointer-events: none;
-    }
-
-    /* Vector Typography Overlay */
-    .vector-text-layer {
-      position: absolute;
-      inset: 0;
-      z-index: 8;
-      pointer-events: none;
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-      padding: 12px 14px;
-      color: #2D2723;
-      transition: opacity 0.3s ease;
-    }
-
-    .vector-text-layer.hidden-overlay {
-      opacity: 0;
     }
 
     /* ========================================= */
@@ -194,7 +175,6 @@
 
     body.is-maximized #appHeader,
     body.is-maximized #appFooter,
-    body.is-maximized #topBadgeBar,
     body.is-maximized #floatingControls {
       display: none !important;
     }
@@ -215,7 +195,6 @@
       height: 100vh !important;
     }
 
-    /* Minimal floating controls in Maximize mode */
     #maximizeOverlayControls {
       display: none;
     }
@@ -226,7 +205,7 @@
 </head>
 <body class="bg-slate-900 text-slate-100 min-h-screen p-3 md:p-5 flex flex-col justify-between transition-colors duration-500" id="mainBody">
 
-  <!-- HEADER (hidden in maximize mode) -->
+  <!-- HEADER -->
   <header id="appHeader" class="flex flex-wrap items-center justify-between gap-3 max-w-6xl mx-auto w-full mb-2 bg-slate-800/85 backdrop-blur border border-slate-700/60 p-3 rounded-2xl shadow-xl transition-all duration-300">
     <div class="flex items-center gap-3">
       <div class="w-10 h-10 rounded-xl bg-amber-500/20 border border-amber-500/40 flex items-center justify-center text-xl shadow-inner" id="brandIcon">
@@ -235,7 +214,7 @@
       <div>
         <div class="flex items-center gap-2">
           <h1 class="text-base md:text-lg font-bold text-white tracking-wide" id="productTitle">KulitYea &mdash; Tropical Orange</h1>
-          <span class="px-2 py-0.5 rounded-full text-[11px] font-semibold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">Ultra HD</span>
+          <span class="px-2 py-0.5 rounded-full text-[11px] font-semibold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">Ultra HD 4K</span>
         </div>
         <p class="text-xs text-slate-400">Kemasan Teh Kulit Buah Alami &bull; 25 Kantong Celup &bull; Studio 3D Prototype</p>
       </div>
@@ -261,13 +240,6 @@
   <!-- 3D VIEWPORT CONTAINER -->
   <main id="mainContainer" class="relative flex-1 max-w-6xl mx-auto w-full flex flex-col items-center justify-center my-1">
     
-    <!-- Top Hints / Status Bar (hidden in maximize mode) -->
-    <div id="topBadgeBar" class="absolute top-2 left-4 z-20 flex items-center gap-2">
-      <button onclick="toggleVectorMode()" id="btnVectorMode" class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/40 text-xs font-semibold shadow-md transition-all">
-        <span>✨</span> <span id="vectorModeLabel">Teks Tajam Ultra-HD: ON</span>
-      </button>
-    </div>
-
     <!-- Active Angle Indicator -->
     <div class="absolute top-2 right-4 z-20 hidden md:flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-800/80 backdrop-blur border border-slate-700/60 text-xs text-slate-400 shadow-lg" id="angleBadge">
       <span>Rotasi:</span>
@@ -299,81 +271,24 @@
         <!-- 3D Box Mesh -->
         <div class="box-container" id="boxMesh">
           
-          <!-- Front Face (4X High-Resolution Texture) -->
+          <!-- Front Face (Clean 1200x2160 Texture) -->
           <div class="box-face face-front" id="faceFront">
             <div class="face-shading" style="background: linear-gradient(135deg, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0) 50%, rgba(0,0,0,0.12) 100%);"></div>
           </div>
           
-          <!-- Back Face (4X High-Resolution Texture) -->
+          <!-- Back Face (Clean 1200x2160 Texture) -->
           <div class="box-face face-back" id="faceBack">
             <div class="face-shading" style="background: linear-gradient(135deg, rgba(255,255,255,0.15) 0%, rgba(255,255,255,0) 50%, rgba(0,0,0,0.15) 100%);"></div>
           </div>
 
-          <!-- Right Face (Filosofi & Info Khasiat + Crisp Vector Overlay) -->
+          <!-- Right Face (Pristine 1200x2160 Vector-Sharp Typography) -->
           <div class="box-face face-right" id="faceRight">
             <div class="face-shading" style="background: linear-gradient(135deg, rgba(255,255,255,0.18) 0%, rgba(255,255,255,0) 50%, rgba(0,0,0,0.14) 100%);"></div>
-            
-            <!-- Vector Typography Layer for 100% Crisp Text -->
-            <div class="vector-text-layer" id="vectorRight">
-              <div class="flex flex-col items-center text-center pt-2">
-                <span class="text-[9px] tracking-widest font-semibold uppercase opacity-80" id="vtRightSmall">TROPICAL</span>
-                <span class="text-[17px] font-black tracking-wide leading-tight" id="vtRightBig">ORANGE</span>
-                <span class="text-[8px] font-bold tracking-wider uppercase opacity-90 mt-0.5" id="vtRightSub">DRIED TROPICAL PEELS</span>
-              </div>
-              
-              <div class="text-[9px] leading-relaxed text-justify px-1 space-y-1.5 opacity-95" id="vtRightBody">
-                <p id="vtRightP1">Tropical Orange kami adalah perayaan kebaikan alam yang diperbarui...</p>
-                <p id="vtRightP2">Berawal dari kepedulian terhadap ratusan ribu ton kulit buah...</p>
-              </div>
-
-              <!-- Fact Box -->
-              <div class="rounded-xl p-2.5 mt-2 bg-white/60 dark:bg-black/30 backdrop-blur-sm border border-black/10 dark:border-white/10 shadow-sm" id="vtFactBox">
-                <div class="flex items-center gap-1 font-bold text-[10px] mb-1" id="vtFactTitle">
-                  Tahukah kamu? 🍊🍊
-                </div>
-                <div class="text-[8px] leading-relaxed text-justify opacity-90" id="vtFactBody">
-                  Aroma jeruk segar pada teh ini 100% berasal dari ekstrak kulit jeruk asli!
-                </div>
-              </div>
-            </div>
           </div>
 
-          <!-- Left Face (Cara Penyajian & Legalitas + Crisp Vector Overlay) -->
+          <!-- Left Face (Pristine 1200x2160 Serving Directions & Badges) -->
           <div class="box-face face-left" id="faceLeft">
             <div class="face-shading" style="background: linear-gradient(135deg, rgba(255,255,255,0.25) 0%, rgba(255,255,255,0) 50%, rgba(0,0,0,0.1) 100%);"></div>
-            
-            <div class="vector-text-layer" id="vectorLeft">
-              <div class="space-y-1 pt-1">
-                <span class="text-[11px] font-bold block border-b border-black/15 pb-0.5">Cara Penyajian :</span>
-                <ol class="text-[8.5px] leading-relaxed list-decimal list-inside space-y-0.5 opacity-90">
-                  <li>Masukan 1 kantong celup ke cangkir</li>
-                  <li>Tuangkan air panas ke dalam cangkir</li>
-                  <li>Diamkan 3 - 5 menit ekstraksi optimal</li>
-                  <li>Nikmati selagi hangat</li>
-                </ol>
-              </div>
-
-              <div class="space-y-1 my-1">
-                <div class="text-[8.5px] opacity-90 leading-tight">
-                  <span class="font-bold block">Diproduksi oleh:</span>
-                  Tim LakuDong!, Bandung - Indonesia
-                </div>
-                <div class="text-[8.5px] opacity-90 leading-tight">
-                  <span class="font-bold block">Ingredients / Komposisi:</span>
-                  <span id="vtLeftIngredients">Kulit Jeruk Pilihan</span>
-                </div>
-              </div>
-
-              <div class="space-y-1.5 pt-1">
-                <div class="text-center py-1 px-2 rounded-lg border border-black/25 text-[8px] font-semibold tracking-wide">
-                  Simpan di tempat kering dan sejuk
-                </div>
-                <div class="flex justify-between items-center text-[8px] opacity-80 pt-0.5 border-t border-black/10">
-                  <span>Instagram: <strong>@kulityea</strong></span>
-                  <span class="text-[7.5px]">Kadaluarsa / EXP</span>
-                </div>
-              </div>
-            </div>
           </div>
 
           <!-- Top Face Wrapper (Hinged Lid) -->
@@ -394,7 +309,7 @@
 
     </div>
 
-    <!-- FLOATING QUICK VIEW CONTROLS (hidden in maximize mode) -->
+    <!-- FLOATING QUICK VIEW CONTROLS -->
     <div id="floatingControls" class="w-full max-w-4xl mx-auto px-2 flex flex-col gap-2 z-20">
       
       <!-- Angle Buttons Bar -->
@@ -426,7 +341,7 @@
       <!-- Feature Toggles Bar -->
       <div class="flex flex-wrap items-center justify-between gap-3 p-2.5 bg-slate-800/80 backdrop-blur border border-slate-700/60 rounded-2xl shadow-lg text-xs">
         
-        <!-- Left: Auto-rotate, Lid Open & MAXIMIZE BUTTON -->
+        <!-- Left: Maximize, Auto-rotate, Lid Open -->
         <div class="flex items-center gap-2">
           <button onclick="toggleMaximize()" id="btnMaximize" class="px-3 py-1.5 rounded-xl font-bold bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-slate-950 shadow-md transition-all flex items-center gap-1.5">
             <span>⛶</span> <span>Maximize (Layar Penuh)</span>
@@ -461,7 +376,7 @@
 
   </main>
 
-  <!-- FOOTER (hidden in maximize mode) -->
+  <!-- FOOTER -->
   <footer id="appFooter" class="max-w-6xl mx-auto w-full mt-1 bg-slate-800/80 backdrop-blur border border-slate-700/60 p-3 rounded-2xl flex flex-wrap items-center justify-between gap-3 text-xs text-slate-400 transition-all duration-300">
     <div class="flex items-center gap-4">
       <span>📐 <strong>Dimensi Kemasan:</strong> 7.5 &times; 7.5 &times; 13.5 cm</span>
@@ -477,7 +392,12 @@
   </footer>
 
   <script>
-    const VARIANTS_META = {"orange": {"title": "Tropical Orange", "color": "#E67E22", "accent": "#F39C12", "bg_top": "#FBF5EB", "bg_bot": "#F48B28", "tagline": "Segarnya alami manfaatnya berlimpah", "sub": "DRIED TROPICAL PEELS", "p1": "Tropical Orange kami adalah perayaan kebaikan alam yang diperbarui. Diracik cermat dari kulit jeruk pilihan yang dikeringkan, menghadirkan seduhan herbal kaya antioksidan dan ramah lingkungan. Rayakan siklus alam dan nikmati kesegaran tropis di setiap cangkir.", "p2": "Berawal dari kepedulian terhadap ratusan ribu ton kulit buah yang terbuang sia-sia, KulitYea mengolah kembali kulit buah pilihan menjadi seduhan herbal fungsional kaya antioksidan. Setiap cangkir yang kamu nikmati turut mendukung petani lokal dan mengurangi emisi di bumi kita.", "fact_title": "Tahukah kamu? \ud83c\udf4a\ud83c\udf4a", "fact_body": "Aroma jeruk segar pada teh ini 100% berasal dari ekstrak kulit jeruk asli! Selain memberikan rasa yang menyegarkan dan cerah, nutrisi alaminya siap meningkatkan mood dan memberikan sentuhan kebahagiaan dari pagi hingga sore.", "ingredients": "Kulit Jeruk Pilihan"}, "dragonfruit": {"title": "Tropical Dragon Fruit", "color": "#C41263", "accent": "#E91E63", "bg_top": "#FDF3F8", "bg_bot": "#C41263", "tagline": "Segarnya alami manfaatnya berlimpah", "sub": "DRIED TROPICAL PEELS", "p1": "Tropical Dragon Fruit kami adalah perayaan kebaikan alam yang diperbarui. Diracik cermat dari kulit Buah Naga pilihan yang dikeringkan, menghadirkan seduhan herbal kaya antioksidan dan ramah lingkungan. Rayakan siklus alam dan nikmati kesegaran tropis di setiap cangkir.", "p2": "Berawal dari kepedulian terhadap ratusan ribu ton kulit buah yang terbuang sia-sia, KulitYea mengolah kembali kulit buah pilihan menjadi seduhan herbal fungsional kaya antioksidan. Setiap cangkir yang kamu nikmati turut mendukung petani lokal dan mengurangi emisi di bumi kita.", "fact_title": "Tahukah kamu? \ud83c\udf3a", "fact_body": "Rona merah muda alami pada teh ini 100% berasal dari ekstrak kulit buah naga! Selain memberikan aroma dan rasa yang super lembut, nutrisi alaminya siap membangkitkan mood dan menjaga vitalitasmu dari pagi hingga malam.", "ingredients": "Kulit Buah Naga Pilihan"}, "mangosteen": {"title": "Tropical Mangosteen", "color": "#651A85", "accent": "#8E24AA", "bg_top": "#F8F3FC", "bg_bot": "#651A85", "tagline": "Segarnya alami manfaatnya berlimpah", "sub": "DRIED TROPICAL PEELS", "p1": "Tropical Mangosteen kami adalah perayaan kebaikan alam yang diperbarui. Diracik cermat dari kulit Manggis pilihan yang dikeringkan, menghadirkan seduhan herbal kaya antioksidan dan ramah lingkungan. Rayakan siklus alam dan nikmati kesegaran tropis di setiap cangkir.", "p2": "Berawal dari kepedulian terhadap ratusan ribu ton kulit buah yang terbuang sia-sia, KulitYea mengolah kembali kulit buah pilihan menjadi seduhan herbal fungsional kaya antioksidan. Setiap cangkir yang kamu nikmati turut mendukung petani lokal dan mengurangi emisi di bumi kita.", "fact_title": "Tahukah kamu? \ud83c\udf47", "fact_body": "rona ungu gelap alami pada teh ini 100% berasal dari ekstrak kulit manggis pilihan! Selain memberikan rasa yang sedikit kelat dan kaya, nutrisi alaminya siap meningkatkan sistem kekebalan tubuh dan menjaga kesehatan kulitmu dari dalam.", "ingredients": "Kulit Manggis Pilihan"}, "salak": {"title": "Tropical Snakeskin Fruit", "color": "#735346", "accent": "#8D6E63", "bg_top": "#F8F4EE", "bg_bot": "#735346", "tagline": "Segarnya alami manfaatnya berlimpah", "sub": "DRIED TROPICAL PEELS", "p1": "Tropical SnakeSkin Fruit kami adalah perayaan kebaikan alam yang diperbarui. Diracik cermat dari kulit Salak pilihan yang dikeringkan, menghadirkan seduhan herbal kaya antioksidan dan ramah lingkungan. Rayakan siklus alam dan nikmati kesegaran tropis di setiap cangkir.", "p2": "Berawal dari kepedulian terhadap ratusan ribu ton kulit buah yang terbuang sia-sia, KulitYea mengolah kembali kulit buah pilihan menjadi seduhan herbal fungsional kaya antioksidan. Setiap cangkir yang kamu nikmati turut mendukung petani lokal dan mengurangi emisi di bumi kita.", "fact_title": "Tahukah kamu? \ud83c\udf30", "fact_body": "Aroma unik alami pada teh ini 100% berasal dari ekstrak kulit salak asli! Selain memberikan rasa yang sedikit manis dan kaya, nutrisi alaminya siap menjaga kesehatan pencernaan dan memberikan rasa nyaman sepanjang hari.", "ingredients": "Kulit Salak Pilihan"}};
+    const TITLES = {
+      orange: { title: "Tropical Orange", icon: "🍊" },
+      dragonfruit: { title: "Tropical Dragon Fruit", icon: "🌺" },
+      mangosteen: { title: "Tropical Mangosteen", icon: "🍇" },
+      salak: { title: "Tropical Snakeskin Fruit", icon: "🌰" }
+    };
 
     let currentVariant = 'orange';
     let rotX = -14;
@@ -488,7 +408,6 @@
     let startY = 0;
     let autoRotate = false;
     let isLidOpen = false;
-    let vectorMode = true;
     let isMaximized = false;
 
     const boxWorld = document.getElementById('boxWorld');
@@ -504,32 +423,16 @@
     const brandIcon = document.getElementById('brandIcon');
     const mainBody = document.getElementById('mainBody');
 
-    // Vector Text Elements
-    const vectorRight = document.getElementById('vectorRight');
-    const vectorLeft = document.getElementById('vectorLeft');
-    const vtRightSmall = document.getElementById('vtRightSmall');
-    const vtRightBig = document.getElementById('vtRightBig');
-    const vtRightSub = document.getElementById('vtRightSub');
-    const vtRightP1 = document.getElementById('vtRightP1');
-    const vtRightP2 = document.getElementById('vtRightP2');
-    const vtFactTitle = document.getElementById('vtFactTitle');
-    const vtFactBody = document.getElementById('vtFactBody');
-    const vtLeftIngredients = document.getElementById('vtLeftIngredients');
-
     function updateTransform() {
       const finalZoom = isMaximized ? zoom * 1.25 : zoom;
       boxWorld.style.transform = `scale3d(${finalZoom}, ${finalZoom}, ${finalZoom}) rotateX(${rotX}deg) rotateY(${rotY}deg)`;
       angleDisplay.textContent = `${Math.round(rotX)}°, ${Math.round(rotY)}°`;
     }
 
-    // ===================================
-    // MAXIMIZE TOGGLE FUNCTION
-    // ===================================
     function toggleMaximize() {
       isMaximized = !isMaximized;
       mainBody.classList.toggle('is-maximized', isMaximized);
 
-      // Try browser fullscreen API if user gestures
       if (isMaximized) {
         if (document.documentElement.requestFullscreen && !document.fullscreenElement) {
           document.documentElement.requestFullscreen().catch(() => {});
@@ -543,14 +446,12 @@
       updateTransform();
     }
 
-    // Press ESC to exit maximize
     window.addEventListener('keydown', (e) => {
       if (e.key === 'Escape' && isMaximized) {
         toggleMaximize();
       }
     });
 
-    // Listen for browser fullscreen exit (e.g. F11 or browser esc)
     document.addEventListener('fullscreenchange', () => {
       if (!document.fullscreenElement && isMaximized) {
         isMaximized = false;
@@ -560,31 +461,22 @@
     });
 
     function selectVariant(key) {
-      if (!VARIANTS_META[key]) return;
+      if (!TITLES[key]) return;
       currentVariant = key;
-      const meta = VARIANTS_META[key];
+      const meta = TITLES[key];
 
-      // Use 4X Super-Sampled HD Textures
-      faceFront.style.backgroundImage = `url("textures/${key}_front_hd.png")`;
-      faceBack.style.backgroundImage = `url("textures/${key}_back_hd.png")`;
-      faceRight.style.backgroundImage = `url("textures/${key}_side_right_hd.png")`;
-      faceLeft.style.backgroundImage = `url("textures/${key}_side_left_hd.png")`;
-      faceTop.style.backgroundImage = `url("textures/${key}_top_hd.png")`;
-      faceBottom.style.backgroundImage = `url("textures/${key}_bottom_hd.png")`;
-
-      // Update Vector Typography Content
-      vtRightBig.textContent = key === 'orange' ? 'ORANGE' : key === 'dragonfruit' ? 'DRAGON FRUIT' : key === 'mangosteen' ? 'MANGOSTEEN' : 'SNAKESKIN FRUIT';
-      vtRightBig.style.color = meta.color;
-      vtRightP1.textContent = meta.p1;
-      vtRightP2.textContent = meta.p2;
-      vtFactTitle.textContent = meta.fact_title;
-      vtFactBody.textContent = meta.fact_body;
-      vtLeftIngredients.textContent = meta.ingredients;
+      // Clean single-layer 1200x2160 textures
+      const cacheBust = '?v=3';
+      faceFront.style.backgroundImage = `url("textures/${key}_front_hd.png${cacheBust}")`;
+      faceBack.style.backgroundImage = `url("textures/${key}_back_hd.png${cacheBust}")`;
+      faceRight.style.backgroundImage = `url("textures/${key}_side_right_hd.png${cacheBust}")`;
+      faceLeft.style.backgroundImage = `url("textures/${key}_side_left_hd.png${cacheBust}")`;
+      faceTop.style.backgroundImage = `url("textures/${key}_top_hd.png${cacheBust}")`;
+      faceBottom.style.backgroundImage = `url("textures/${key}_bottom_hd.png${cacheBust}")`;
 
       // Update UI Header
-      const icons = { orange: '🍊', dragonfruit: '🌺', mangosteen: '🍇', salak: '🌰' };
       productTitle.textContent = `KulitYea — ${meta.title}`;
-      brandIcon.textContent = icons[key] || '🍵';
+      brandIcon.textContent = meta.icon;
 
       document.querySelectorAll('.variant-btn').forEach(btn => {
         btn.className = 'variant-btn px-2.5 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all text-slate-400 hover:text-white';
@@ -593,13 +485,6 @@
       if (activeBtn) {
         activeBtn.className = 'variant-btn px-2.5 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all bg-amber-500 text-white shadow-md';
       }
-    }
-
-    function toggleVectorMode() {
-      vectorMode = !vectorMode;
-      vectorRight.classList.toggle('hidden-overlay', !vectorMode);
-      vectorLeft.classList.toggle('hidden-overlay', !vectorMode);
-      document.getElementById('vectorModeLabel').textContent = vectorMode ? 'Teks Tajam Ultra-HD: ON' : 'Teks Asli Dieline: ON';
     }
 
     function setAngle(x, y) {
