@@ -3,436 +3,395 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>KulitYea - Ultra HD 3D Packaging Prototype</title>
+  <title>KulitYea - 3D Interactive Studio</title>
   <script src="https://www.gstatic.com/antigravity/web/dev/tailwindcss.min.js"></script>
+  <script src="three.min.js"></script>
+  <script src="OrbitControls.js"></script>
   <style>
     body {
       user-select: none;
       -webkit-user-select: none;
-      overflow-x: hidden;
+      overflow: hidden;
       font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      text-rendering: optimizeLegibility;
-      -webkit-font-smoothing: antialiased;
-    }
-    
-    .scene-viewport {
-      perspective: 1500px;
-      perspective-origin: 50% 45%;
-      touch-action: none;
-      transition: all 0.4s ease;
+      background: #0f172a;
+      color: #f8fafc;
     }
 
-    .box-world {
-      transform-style: preserve-3d;
-      transition: transform 0.08s cubic-bezier(0.1, 0.9, 0.2, 1);
+    #canvas3d {
+      width: 100%;
+      height: 100%;
+      outline: none;
+      display: block;
     }
 
-    /* Box dimensions: W: 250px, H: 450px, D: 250px (Scale ratio 1 : 1.8) */
-    .box-container {
-      position: relative;
-      width: 250px;
-      height: 450px;
-      transform-style: preserve-3d;
-      margin: 0 auto;
-    }
-
-    .box-face {
-      position: absolute;
-      left: 50%;
-      top: 50%;
-      background-size: 100% 100%;
-      background-position: center;
-      background-repeat: no-repeat;
-      backface-visibility: hidden;
-      -webkit-backface-visibility: hidden;
-      box-shadow: inset 0 0 25px rgba(0,0,0,0.06);
-      border-radius: 1.5px;
-      image-rendering: -webkit-optimize-contrast;
-      image-rendering: high-quality;
-    }
-
-    /* Subtle paper edge highlight */
-    .box-face::after {
-      content: '';
-      position: absolute;
-      inset: 0;
-      pointer-events: none;
-      box-shadow: inset 0 0 0 0.5px rgba(255,255,255,0.4), inset 0 0 8px rgba(0,0,0,0.05);
-      z-index: 10;
-    }
-
-    .face-shading {
-      position: absolute;
-      inset: 0;
-      pointer-events: none;
-      mix-blend-mode: overlay;
-      z-index: 5;
-    }
-
-    /* 6 Faces Geometry */
-    .face-front {
-      width: 250px;
-      height: 450px;
-      margin-left: -125px;
-      margin-top: -225px;
-      transform: rotateY(0deg) translateZ(125px);
-    }
-
-    .face-back {
-      width: 250px;
-      height: 450px;
-      margin-left: -125px;
-      margin-top: -225px;
-      transform: rotateY(180deg) translateZ(125px);
-    }
-
-    .face-right {
-      width: 250px;
-      height: 450px;
-      margin-left: -125px;
-      margin-top: -225px;
-      transform: rotateY(90deg) translateZ(125px);
-    }
-
-    .face-left {
-      width: 250px;
-      height: 450px;
-      margin-left: -125px;
-      margin-top: -225px;
-      transform: rotateY(-90deg) translateZ(125px);
-    }
-
-    .face-top-wrapper {
-      position: absolute;
-      left: 50%;
-      top: 50%;
-      width: 250px;
-      height: 250px;
-      margin-left: -125px;
-      margin-top: -125px;
-      transform-style: preserve-3d;
-      transform: rotateX(90deg) translateZ(225px);
-    }
-
-    .face-top {
-      width: 250px;
-      height: 250px;
-      position: absolute;
-      inset: 0;
-      transform-origin: top center;
-      transition: transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
-    }
-
-    .face-top.lid-open {
-      transform: rotateX(-120deg);
-    }
-
-    .face-bottom {
-      width: 250px;
-      height: 250px;
-      margin-left: -125px;
-      margin-top: -125px;
-      transform: rotateX(-90deg) translateZ(225px);
-    }
-
-    /* Floor Shadow */
-    .studio-shadow {
-      position: absolute;
-      left: 50%;
-      top: 50%;
-      width: 360px;
-      height: 360px;
-      margin-left: -180px;
-      margin-top: -180px;
-      transform: rotateX(90deg) translateZ(-232px);
-      background: radial-gradient(ellipse at center, rgba(15, 10, 5, 0.45) 0%, rgba(20, 15, 10, 0.2) 35%, rgba(0,0,0,0.03) 60%, transparent 75%);
-      filter: blur(16px);
-      pointer-events: none;
-    }
-
-    .studio-pedestal {
-      position: absolute;
-      left: 50%;
-      top: 50%;
-      width: 530px;
-      height: 530px;
-      margin-left: -265px;
-      margin-top: -265px;
-      transform: rotateX(90deg) translateZ(-235px);
-      border-radius: 50%;
-      background: radial-gradient(circle, rgba(255,255,255,0.7) 0%, rgba(245,245,250,0.35) 55%, transparent 72%);
-      pointer-events: none;
-    }
-
-    /* ========================================= */
-    /* MAXIMIZE / FULLSCREEN MODE STYLES         */
-    /* ========================================= */
-    body.is-maximized {
-      padding: 0 !important;
-      margin: 0 !important;
-      overflow: hidden !important;
-    }
-
-    body.is-maximized #appHeader,
-    body.is-maximized #appFooter,
-    body.is-maximized #floatingControls {
+    /* Fullscreen Mode */
+    body.is-maximized #topHeader,
+    body.is-maximized #bottomFooter,
+    body.is-maximized #normalControls {
       display: none !important;
     }
 
-    body.is-maximized #mainContainer {
-      position: fixed !important;
-      inset: 0 !important;
-      width: 100vw !important;
-      height: 100vh !important;
-      max-width: 100vw !important;
-      margin: 0 !important;
-      padding: 0 !important;
-      z-index: 100 !important;
-    }
-
-    body.is-maximized .scene-viewport {
-      width: 100vw !important;
-      height: 100vh !important;
-    }
-
-    #maximizeOverlayControls {
+    #maximizeControls {
       display: none;
     }
-    body.is-maximized #maximizeOverlayControls {
+    body.is-maximized #maximizeControls {
       display: flex;
+    }
+
+    /* Side Reader Drawer */
+    #readerDrawer {
+      transform: translateX(100%);
+      transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    #readerDrawer.open {
+      transform: translateX(0);
     }
   </style>
 </head>
-<body class="bg-slate-900 text-slate-100 min-h-screen p-3 md:p-5 flex flex-col justify-between transition-colors duration-500" id="mainBody">
+<body class="w-screen h-screen relative flex flex-col justify-between">
 
-  <!-- HEADER -->
-  <header id="appHeader" class="flex flex-wrap items-center justify-between gap-3 max-w-6xl mx-auto w-full mb-2 bg-slate-800/85 backdrop-blur border border-slate-700/60 p-3 rounded-2xl shadow-xl transition-all duration-300">
+  <!-- TOP HEADER -->
+  <header id="topHeader" class="absolute top-3 inset-x-3 md:inset-x-6 max-w-6xl mx-auto z-20 flex flex-wrap items-center justify-between gap-3 bg-slate-900/85 backdrop-blur-md border border-slate-700/60 p-3 rounded-2xl shadow-2xl transition-all">
     <div class="flex items-center gap-3">
-      <div class="w-10 h-10 rounded-xl bg-amber-500/20 border border-amber-500/40 flex items-center justify-center text-xl shadow-inner" id="brandIcon">
+      <div class="w-10 h-10 rounded-xl bg-amber-500/20 border border-amber-500/40 flex items-center justify-center text-xl shadow-inner" id="vIcon">
         🍊
       </div>
       <div>
         <div class="flex items-center gap-2">
-          <h1 class="text-base md:text-lg font-bold text-white tracking-wide" id="productTitle">KulitYea &mdash; Tropical Orange</h1>
-          <span class="px-2 py-0.5 rounded-full text-[11px] font-semibold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">Ultra HD 4K</span>
+          <h1 class="text-sm md:text-base font-bold text-white tracking-wide" id="vTitle">KulitYea &mdash; Tropical Orange</h1>
+          <span class="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">WebGL 3D</span>
         </div>
-        <p class="text-xs text-slate-400">Kemasan Teh Kulit Buah Alami &bull; 25 Kantong Celup &bull; Studio 3D Prototype</p>
+        <p class="text-[11px] text-slate-400">Drag mouse/layar untuk putar 360&deg; &bull; Scroll untuk Zoom &bull; 25 Tea Bags</p>
       </div>
     </div>
 
     <!-- Variant Selector -->
-    <div class="flex items-center gap-1.5 p-1 bg-slate-900/80 rounded-xl border border-slate-700/60">
-      <button onclick="selectVariant('orange')" id="btn-orange" class="variant-btn px-2.5 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all bg-amber-500 text-white shadow-md">
+    <div class="flex items-center gap-1.5 p-1 bg-slate-950/80 rounded-xl border border-slate-700/60">
+      <button onclick="setVariant('orange')" id="btn-orange" class="px-2.5 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all bg-amber-500 text-white shadow-md">
         <span>🍊</span> <span class="hidden sm:inline">Orange</span>
       </button>
-      <button onclick="selectVariant('dragonfruit')" id="btn-dragonfruit" class="variant-btn px-2.5 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all text-slate-400 hover:text-white">
+      <button onclick="setVariant('dragonfruit')" id="btn-dragonfruit" class="px-2.5 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all text-slate-400 hover:text-white">
         <span>🌺</span> <span class="hidden sm:inline">Dragon Fruit</span>
       </button>
-      <button onclick="selectVariant('mangosteen')" id="btn-mangosteen" class="variant-btn px-2.5 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all text-slate-400 hover:text-white">
+      <button onclick="setVariant('mangosteen')" id="btn-mangosteen" class="px-2.5 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all text-slate-400 hover:text-white">
         <span>🍇</span> <span class="hidden sm:inline">Mangosteen</span>
       </button>
-      <button onclick="selectVariant('salak')" id="btn-salak" class="variant-btn px-2.5 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all text-slate-400 hover:text-white">
+      <button onclick="setVariant('salak')" id="btn-salak" class="px-2.5 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all text-slate-400 hover:text-white">
         <span>🌰</span> <span class="hidden sm:inline">Salak</span>
       </button>
     </div>
   </header>
 
-  <!-- 3D VIEWPORT CONTAINER -->
-  <main id="mainContainer" class="relative flex-1 max-w-6xl mx-auto w-full flex flex-col items-center justify-center my-1">
-    
-    <!-- Active Angle Indicator -->
-    <div class="absolute top-2 right-4 z-20 hidden md:flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-800/80 backdrop-blur border border-slate-700/60 text-xs text-slate-400 shadow-lg" id="angleBadge">
-      <span>Rotasi:</span>
-      <span class="font-mono text-amber-400 font-semibold" id="angleDisplay">-14&deg;, -32&deg;</span>
-    </div>
-
-    <!-- MAXIMIZE FLOATING EXIT & CONTROLS (Only visible when Maximized) -->
-    <div id="maximizeOverlayControls" class="fixed top-5 right-5 z-50 flex items-center gap-2 transition-all">
-      <button onclick="toggleAutoRotate()" id="btnMaxAutoRotate" class="px-3.5 py-2 rounded-xl bg-slate-800/75 hover:bg-slate-700/90 text-slate-200 border border-slate-700/80 backdrop-blur-md shadow-2xl text-xs font-semibold flex items-center gap-1.5 transition-all">
-        <span id="maxAutoIcon">▶️</span> <span id="maxAutoText">Putar</span>
-      </button>
-      <button onclick="toggleLid()" class="px-3.5 py-2 rounded-xl bg-slate-800/75 hover:bg-slate-700/90 text-slate-200 border border-slate-700/80 backdrop-blur-md shadow-2xl text-xs font-semibold flex items-center gap-1.5 transition-all">
-        <span>📦</span> <span>Buka Tutup</span>
-      </button>
-      <button onclick="toggleMaximize()" class="px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold border border-amber-400 backdrop-blur-md shadow-2xl text-xs flex items-center gap-2 transition-all">
-        <span>🗗</span> <span>Keluar Fullscreen (ESC)</span>
-      </button>
-    </div>
-
-    <!-- 3D Canvas Area -->
-    <div class="scene-viewport relative w-full h-[520px] md:h-[580px] flex items-center justify-center cursor-grab active:cursor-grabbing select-none" id="viewport">
-      
-      <div class="box-world" id="boxWorld">
-        
-        <!-- Studio Ground & Shadow -->
-        <div class="studio-pedestal"></div>
-        <div class="studio-shadow" id="boxShadow"></div>
-
-        <!-- 3D Box Mesh -->
-        <div class="box-container" id="boxMesh">
-          
-          <!-- Front Face (Clean 1200x2160 Texture) -->
-          <div class="box-face face-front" id="faceFront">
-            <div class="face-shading" style="background: linear-gradient(135deg, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0) 50%, rgba(0,0,0,0.12) 100%);"></div>
-          </div>
-          
-          <!-- Back Face (Clean 1200x2160 Texture) -->
-          <div class="box-face face-back" id="faceBack">
-            <div class="face-shading" style="background: linear-gradient(135deg, rgba(255,255,255,0.15) 0%, rgba(255,255,255,0) 50%, rgba(0,0,0,0.15) 100%);"></div>
-          </div>
-
-          <!-- Right Face (Pristine 1200x2160 Vector-Sharp Typography) -->
-          <div class="box-face face-right" id="faceRight">
-            <div class="face-shading" style="background: linear-gradient(135deg, rgba(255,255,255,0.18) 0%, rgba(255,255,255,0) 50%, rgba(0,0,0,0.14) 100%);"></div>
-          </div>
-
-          <!-- Left Face (Pristine 1200x2160 Serving Directions & Badges) -->
-          <div class="box-face face-left" id="faceLeft">
-            <div class="face-shading" style="background: linear-gradient(135deg, rgba(255,255,255,0.25) 0%, rgba(255,255,255,0) 50%, rgba(0,0,0,0.1) 100%);"></div>
-          </div>
-
-          <!-- Top Face Wrapper (Hinged Lid) -->
-          <div class="face-top-wrapper">
-            <div class="box-face face-top" id="faceTop">
-              <div class="face-shading" style="background: linear-gradient(180deg, rgba(255,255,255,0.3) 0%, rgba(255,255,255,0.05) 50%, rgba(0,0,0,0.1) 100%);"></div>
-            </div>
-          </div>
-
-          <!-- Bottom Face -->
-          <div class="box-face face-bottom" id="faceBottom">
-            <div class="face-shading" style="background: rgba(0,0,0,0.25);"></div>
-          </div>
-
-        </div>
-
-      </div>
-
-    </div>
-
-    <!-- FLOATING QUICK VIEW CONTROLS -->
-    <div id="floatingControls" class="w-full max-w-4xl mx-auto px-2 flex flex-col gap-2 z-20">
-      
-      <!-- Angle Buttons Bar -->
-      <div class="flex flex-wrap items-center justify-center gap-1.5 p-2 bg-slate-800/90 backdrop-blur border border-slate-700/60 rounded-2xl shadow-xl">
-        <span class="text-xs text-slate-400 font-medium px-2 hidden sm:inline">Sudut Pandang:</span>
-        <button onclick="setAngle(-14, -32)" class="px-3 py-1.5 rounded-xl text-xs font-semibold bg-amber-500/20 text-amber-300 border border-amber-500/30 hover:bg-amber-500/30 transition-all flex items-center gap-1">
-          <span>📸</span> Studio Hero 3D
-        </button>
-        <button onclick="setAngle(0, 0)" class="px-3 py-1.5 rounded-xl text-xs font-semibold bg-slate-700/70 hover:bg-slate-600 text-slate-200 transition-all flex items-center gap-1">
-          <span>🔲</span> Depan
-        </button>
-        <button onclick="setAngle(0, 90)" class="px-3 py-1.5 rounded-xl text-xs font-semibold bg-slate-700/70 hover:bg-slate-600 text-slate-200 transition-all flex items-center gap-1">
-          <span>◀️</span> Kiri (Penyajian)
-        </button>
-        <button onclick="setAngle(0, 180)" class="px-3 py-1.5 rounded-xl text-xs font-semibold bg-slate-700/70 hover:bg-slate-600 text-slate-200 transition-all flex items-center gap-1">
-          <span>🔲</span> Belakang
-        </button>
-        <button onclick="setAngle(0, -90)" class="px-3 py-1.5 rounded-xl text-xs font-semibold bg-amber-500/20 text-amber-300 border border-amber-500/40 hover:bg-amber-500/30 transition-all flex items-center gap-1">
-          <span>▶️</span> Kanan (Baca Teks)
-        </button>
-        <button onclick="setAngle(-90, 0)" class="px-3 py-1.5 rounded-xl text-xs font-semibold bg-slate-700/70 hover:bg-slate-600 text-slate-200 transition-all flex items-center gap-1">
-          <span>🔼</span> Atas (Logo)
-        </button>
-        <button onclick="setAngle(90, 0)" class="px-3 py-1.5 rounded-xl text-xs font-semibold bg-slate-700/70 hover:bg-slate-600 text-slate-200 transition-all flex items-center gap-1">
-          <span>🔽</span> Bawah
-        </button>
-      </div>
-
-      <!-- Feature Toggles Bar -->
-      <div class="flex flex-wrap items-center justify-between gap-3 p-2.5 bg-slate-800/80 backdrop-blur border border-slate-700/60 rounded-2xl shadow-lg text-xs">
-        
-        <!-- Left: Maximize, Auto-rotate, Lid Open -->
-        <div class="flex items-center gap-2">
-          <button onclick="toggleMaximize()" id="btnMaximize" class="px-3 py-1.5 rounded-xl font-bold bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-slate-950 shadow-md transition-all flex items-center gap-1.5">
-            <span>⛶</span> <span>Maximize (Layar Penuh)</span>
-          </button>
-
-          <button onclick="toggleAutoRotate()" id="btnAutoRotate" class="px-3 py-1.5 rounded-xl font-semibold bg-slate-700/70 hover:bg-slate-600 text-slate-200 transition-all flex items-center gap-1.5">
-            <span id="autoRotateIcon">▶️</span> <span id="autoRotateText">Putar Otomatis</span>
-          </button>
-          
-          <button onclick="toggleLid()" id="btnLid" class="px-3 py-1.5 rounded-xl font-semibold bg-slate-700/70 hover:bg-slate-600 text-slate-200 transition-all flex items-center gap-1.5">
-            <span>📦</span> <span id="lidText">Buka Tutup Box</span>
-          </button>
-        </div>
-
-        <!-- Middle: Zoom Slider -->
-        <div class="flex items-center gap-2">
-          <span class="text-slate-400">Zoom:</span>
-          <input type="range" min="0.6" max="2.4" step="0.05" value="1.0" id="zoomRange" oninput="setZoom(this.value)" class="w-28 accent-amber-500 cursor-pointer">
-        </div>
-
-        <!-- Right: Studio Background Switcher -->
-        <div class="flex items-center gap-1.5">
-          <span class="text-slate-400">Studio:</span>
-          <button onclick="setStudioTheme('dark')" class="w-5 h-5 rounded-full bg-slate-900 border border-slate-600 hover:scale-110 transition-transform" title="Dark Studio"></button>
-          <button onclick="setStudioTheme('light')" class="w-5 h-5 rounded-full bg-slate-200 border border-slate-400 hover:scale-110 transition-transform" title="Clean White"></button>
-          <button onclick="setStudioTheme('warm')" class="w-5 h-5 rounded-full bg-amber-950 border border-amber-600 hover:scale-110 transition-transform" title="Warm Sunset"></button>
-        </div>
-
-      </div>
-
-    </div>
-
+  <!-- WEBGL 3D VIEWPORT -->
+  <main class="w-full h-full absolute inset-0 z-0">
+    <canvas id="canvas3d"></canvas>
   </main>
 
-  <!-- FOOTER -->
-  <footer id="appFooter" class="max-w-6xl mx-auto w-full mt-1 bg-slate-800/80 backdrop-blur border border-slate-700/60 p-3 rounded-2xl flex flex-wrap items-center justify-between gap-3 text-xs text-slate-400 transition-all duration-300">
-    <div class="flex items-center gap-4">
-      <span>📐 <strong>Dimensi Kemasan:</strong> 7.5 &times; 7.5 &times; 13.5 cm</span>
-      <span class="hidden sm:inline">&bull;</span>
-      <span>🏷️ <strong>Tipe Kemasan:</strong> Straight Tuck Box (Carton 310gsm)</span>
-      <span class="hidden md:inline">&bull;</span>
-      <span>🍵 <strong>Kapasitas:</strong> 25 Kantong Celup</span>
+  <!-- MAXIMIZE FLOATING EXIT & ACTION BAR (Only in Maximize Mode) -->
+  <div id="maximizeControls" class="fixed top-5 right-5 z-40 flex items-center gap-2">
+    <button onclick="openReader()" class="px-3.5 py-2 rounded-xl bg-slate-800/80 hover:bg-slate-700 text-slate-200 border border-slate-700 backdrop-blur-md shadow-2xl text-xs font-semibold flex items-center gap-1.5">
+      <span>📖</span> <span>Baca Teks Kemasan</span>
+    </button>
+    <button onclick="toggleAutoRotate()" id="btnMaxAuto" class="px-3.5 py-2 rounded-xl bg-slate-800/80 hover:bg-slate-700 text-slate-200 border border-slate-700 backdrop-blur-md shadow-2xl text-xs font-semibold flex items-center gap-1.5">
+      <span>▶️</span> <span id="maxAutoLabel">Putar</span>
+    </button>
+    <button onclick="toggleMaximize()" class="px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold border border-amber-400 shadow-2xl text-xs flex items-center gap-1.5">
+      <span>🗗</span> <span>Keluar Maximize (ESC)</span>
+    </button>
+  </div>
+
+  <!-- FLOATING QUICK CONTROLS (Normal Mode) -->
+  <div id="normalControls" class="absolute bottom-14 inset-x-3 md:inset-x-6 max-w-4xl mx-auto z-20 flex flex-col gap-2">
+    
+    <!-- Quick Views Bar -->
+    <div class="flex flex-wrap items-center justify-center gap-1.5 p-2 bg-slate-900/90 backdrop-blur-md border border-slate-700/60 rounded-2xl shadow-2xl">
+      <span class="text-xs text-slate-400 font-medium px-2 hidden sm:inline">Sudut Pandang:</span>
+      <button onclick="flyTo(0.65, 0.45, 1.4)" class="px-3 py-1.5 rounded-xl text-xs font-semibold bg-amber-500/20 text-amber-300 border border-amber-500/40 hover:bg-amber-500/30 transition-all flex items-center gap-1">
+        <span>📸</span> 3D Studio
+      </button>
+      <button onclick="flyTo(0, 0, 1.55)" class="px-3 py-1.5 rounded-xl text-xs font-semibold bg-slate-800/80 hover:bg-slate-700 text-slate-200 transition-all">
+        Depan
+      </button>
+      <button onclick="flyTo(-1.55, 0, 0)" class="px-3 py-1.5 rounded-xl text-xs font-semibold bg-slate-800/80 hover:bg-slate-700 text-slate-200 transition-all">
+        ◀️ Kiri (Penyajian)
+      </button>
+      <button onclick="flyTo(0, 0, -1.55)" class="px-3 py-1.5 rounded-xl text-xs font-semibold bg-slate-800/80 hover:bg-slate-700 text-slate-200 transition-all">
+        Belakang
+      </button>
+      <button onclick="flyTo(1.55, 0, 0)" class="px-3 py-1.5 rounded-xl text-xs font-semibold bg-slate-800/80 hover:bg-slate-700 text-slate-200 transition-all">
+        ▶️ Kanan (Khasiat)
+      </button>
+      <button onclick="flyTo(0, 1.55, 0.05)" class="px-3 py-1.5 rounded-xl text-xs font-semibold bg-slate-800/80 hover:bg-slate-700 text-slate-200 transition-all">
+        Atas
+      </button>
+      <button onclick="flyTo(0, -1.55, 0.05)" class="px-3 py-1.5 rounded-xl text-xs font-semibold bg-slate-800/80 hover:bg-slate-700 text-slate-200 transition-all">
+        Bawah
+      </button>
     </div>
 
-    <a href="https://github.com/hmmdz09/kulityea-3d-packaging" target="_blank" class="px-3.5 py-1.5 rounded-xl font-semibold bg-slate-700/80 hover:bg-slate-600 text-white transition-all shadow-md flex items-center gap-1.5">
-      <span>📦</span> GitHub Repo
+    <!-- Feature Actions Bar -->
+    <div class="flex flex-wrap items-center justify-between gap-3 p-2.5 bg-slate-900/85 backdrop-blur-md border border-slate-700/60 rounded-2xl shadow-xl text-xs">
+      
+      <div class="flex items-center gap-2">
+        <button onclick="toggleMaximize()" class="px-3.5 py-1.5 rounded-xl font-bold bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-slate-950 shadow-md transition-all flex items-center gap-1.5">
+          <span>⛶</span> <span>Maximize (Layar Penuh)</span>
+        </button>
+
+        <button onclick="openReader()" class="px-3.5 py-1.5 rounded-xl font-semibold bg-emerald-600 hover:bg-emerald-500 text-white shadow-md transition-all flex items-center gap-1.5">
+          <span>📖</span> <span>Detail Teks Kemasan</span>
+        </button>
+
+        <button onclick="toggleAutoRotate()" id="btnAutoRot" class="px-3 py-1.5 rounded-xl font-semibold bg-slate-800/80 hover:bg-slate-700 text-slate-200 transition-all flex items-center gap-1.5">
+          <span id="rotIcon">▶️</span> <span id="rotText">Putar Otomatis</span>
+        </button>
+      </div>
+
+      <div class="flex items-center gap-2 text-slate-400">
+        <span>💡 Pencahayaan:</span>
+        <button onclick="setTheme('dark')" class="w-5 h-5 rounded-full bg-slate-950 border border-slate-600 hover:scale-110" title="Studio Gelap"></button>
+        <button onclick="setTheme('light')" class="w-5 h-5 rounded-full bg-slate-200 border border-slate-400 hover:scale-110" title="Studio Terang"></button>
+        <button onclick="setTheme('warm')" class="w-5 h-5 rounded-full bg-amber-950 border border-amber-600 hover:scale-110" title="Studio Hangat"></button>
+      </div>
+
+    </div>
+
+  </div>
+
+  <!-- FOOTER SPECS -->
+  <footer id="bottomFooter" class="absolute bottom-2 inset-x-3 md:inset-x-6 max-w-6xl mx-auto z-20 bg-slate-900/80 backdrop-blur-md border border-slate-700/60 px-4 py-2 rounded-xl flex items-center justify-between text-xs text-slate-400">
+    <div class="flex items-center gap-4">
+      <span>📐 <strong>Ukuran Kemasan:</strong> 7.5 &times; 7.5 &times; 13.5 cm</span>
+      <span class="hidden sm:inline">&bull;</span>
+      <span>🏷️ Straight Tuck Box (Carton 310gsm)</span>
+      <span class="hidden md:inline">&bull;</span>
+      <span>🍵 25 Kantong Celup</span>
+    </div>
+
+    <a href="https://github.com/hmmdz09/kulityea-3d-packaging" target="_blank" class="hover:text-amber-400 font-semibold transition-colors flex items-center gap-1">
+      <span>📦</span> GitHub
     </a>
   </footer>
 
-  <script>
-    const TITLES = {
-      orange: { title: "Tropical Orange", icon: "🍊" },
-      dragonfruit: { title: "Tropical Dragon Fruit", icon: "🌺" },
-      mangosteen: { title: "Tropical Mangosteen", icon: "🍇" },
-      salak: { title: "Tropical Snakeskin Fruit", icon: "🌰" }
-    };
+  <!-- SIDE READER DRAWER (Tampilan Teks 100% Super Jernih & Rapi) -->
+  <aside id="readerDrawer" class="fixed top-0 right-0 bottom-0 w-full max-w-md bg-slate-900/95 backdrop-blur-xl border-l border-slate-700 z-50 p-6 flex flex-col justify-between overflow-y-auto shadow-2xl">
+    
+    <div>
+      <div class="flex items-center justify-between border-b border-slate-800 pb-3 mb-4">
+        <div class="flex items-center gap-2">
+          <span class="text-2xl" id="dIcon">🍊</span>
+          <div>
+            <h2 class="text-base font-bold text-white" id="dTitle">KulitYea — Tropical Orange</h2>
+            <span class="text-[11px] text-amber-400 font-semibold" id="dBadge">Teh Ekstrak Kulit Jeruk</span>
+          </div>
+        </div>
+        <button onclick="closeReader()" class="w-8 h-8 rounded-full bg-slate-800 hover:bg-slate-700 text-slate-300 flex items-center justify-center text-lg">&times;</button>
+      </div>
 
-    let currentVariant = 'orange';
-    let rotX = -14;
-    let rotY = -32;
-    let zoom = 1.0;
-    let isDragging = false;
-    let startX = 0;
-    let startY = 0;
+      <!-- Section: Brand Story -->
+      <div class="space-y-4 text-xs text-slate-300 leading-relaxed">
+        <div>
+          <h3 class="text-amber-400 font-bold uppercase tracking-wider text-[11px] mb-1">🌿 Cerita &amp; Filosofi Produk</h3>
+          <p id="dP1" class="text-justify mb-2">Tropical Orange kami adalah perayaan kebaikan alam...</p>
+          <p id="dP2" class="text-justify">Berawal dari kepedulian terhadap ratusan ribu ton kulit buah...</p>
+        </div>
+
+        <!-- Section: Tahukah Kamu -->
+        <div class="bg-amber-500/10 border border-amber-500/30 rounded-xl p-3.5 text-amber-100">
+          <h4 class="font-bold text-xs mb-1 text-amber-300" id="dFactTitle">Tahukah kamu? 🍊</h4>
+          <p id="dFactBody" class="text-justify text-[11.5px] leading-relaxed">Aroma jeruk segar pada teh ini 100% berasal dari ekstrak kulit jeruk asli!</p>
+        </div>
+
+        <!-- Section: Cara Penyajian -->
+        <div class="border-t border-slate-800 pt-3">
+          <h3 class="text-amber-400 font-bold uppercase tracking-wider text-[11px] mb-2">☕ Cara Penyajian Optimal</h3>
+          <ol class="list-decimal list-inside space-y-1.5 text-slate-300" id="dSteps">
+            <li>Masukan 1 kantong celup KulitYea ke dalam cangkir</li>
+            <li>Tuangkan air panas ke dalam cangkir (±200ml)</li>
+            <li>Diamkan selama 3 - 5 menit agar aroma terekstraksi optimal</li>
+            <li>Nikmati selagi hangat</li>
+          </ol>
+        </div>
+
+        <!-- Section: Komposisi & Legalitas -->
+        <div class="border-t border-slate-800 pt-3 space-y-1 text-slate-400 text-[11.5px]">
+          <p><strong>Komposisi:</strong> <span id="dIngredients" class="text-slate-200">Kulit Jeruk Pilihan (100% Alami)</span></p>
+          <p><strong>Diproduksi oleh:</strong> <span id="dProducer" class="text-slate-200">Tim LakuDong!, Bandung - Indonesia</span></p>
+          <p><strong>Penyimpanan:</strong> <span id="dStorage" class="text-slate-200">Simpan di tempat kering dan sejuk.</span></p>
+          <p><strong>Instagram:</strong> <span class="text-amber-400 font-semibold">@kulityea</span></p>
+        </div>
+      </div>
+    </div>
+
+    <div class="pt-4 border-t border-slate-800 mt-6">
+      <button onclick="closeReader()" class="w-full py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs transition-all shadow-md">
+        Kembali ke Tampilan 3D Box
+      </button>
+    </div>
+
+  </aside>
+
+  <script>
+    const VARIANTS_DATA = {"orange": {"title": "KulitYea \u2014 Tropical Orange", "icon": "\ud83c\udf4a", "color": "#F28522", "badge": "Teh Ekstrak Kulit Jeruk Asli", "p1": "Tropical Orange kami adalah perayaan kebaikan alam yang diperbarui. Diracik cermat dari kulit jeruk pilihan yang dikeringkan, menghadirkan seduhan herbal kaya antioksidan dan ramah lingkungan. Rayakan siklus alam dan nikmati kesegaran tropis di setiap cangkir.", "p2": "Berawal dari kepedulian terhadap ratusan ribu ton kulit buah yang terbuang sia-sia, KulitYea mengolah kembali kulit buah pilihan menjadi seduhan herbal fungsional kaya antioksidan. Setiap cangkir yang kamu nikmati turut mendukung petani lokal dan mengurangi emisi di bumi kita.", "fact_title": "Tahukah kamu?", "fact_body": "Aroma jeruk segar pada teh ini 100% berasal dari ekstrak kulit jeruk asli! Selain memberikan rasa menyegarkan dan cerah, nutrisi alaminya siap meningkatkan mood dan memberi kebahagiaan sepanjang hari.", "steps": ["Masukan 1 kantong celup KulitYea ke dalam cangkir", "Tuangkan air panas ke dalam cangkir (\u00b1200ml)", "Diamkan selama 3 - 5 menit agar aroma dan nutrisi terekstraksi optimal", "Nikmati selagi hangat untuk relaksasi tubuh dan pikiran"], "ingredients": "Kulit Jeruk Pilihan (100% Alami)", "producer": "Tim LakuDong!, Bandung - Indonesia", "storage": "Simpan di tempat kering, sejuk, dan terhindar dari sinar matahari langsung."}, "dragonfruit": {"title": "KulitYea \u2014 Tropical Dragon Fruit", "icon": "\ud83c\udf3a", "color": "#C41263", "badge": "Teh Ekstrak Kulit Buah Naga", "p1": "Tropical Dragon Fruit kami adalah perayaan kebaikan alam yang diperbarui. Diracik cermat dari kulit Buah Naga pilihan yang dikeringkan, menghadirkan seduhan herbal kaya antioksidan dan ramah lingkungan. Rayakan siklus alam dan nikmati kesegaran tropis di setiap cangkir.", "p2": "Berawal dari kepedulian terhadap ratusan ribu ton kulit buah yang terbuang sia-sia, KulitYea mengolah kembali kulit buah pilihan menjadi seduhan herbal fungsional kaya antioksidan. Setiap cangkir turut mendukung petani lokal dan mengurangi emisi di bumi kita.", "fact_title": "Tahukah kamu?", "fact_body": "Rona merah muda alami pada teh ini 100% berasal dari ekstrak kulit buah naga! Selain memberikan rasa yang super lembut, nutrisinya siap membangkitkan mood dan menjaga vitalitasmu dari pagi hingga malam.", "steps": ["Masukan 1 kantong celup KulitYea ke dalam cangkir", "Tuangkan air panas ke dalam cangkir (\u00b1200ml)", "Diamkan selama 3 - 5 menit agar aroma terekstraksi optimal", "Nikmati selagi hangat"], "ingredients": "Kulit Buah Naga Pilihan (100% Alami)", "producer": "Tim LakuDong!, Bandung - Indonesia", "storage": "Simpan di tempat kering dan sejuk."}, "mangosteen": {"title": "KulitYea \u2014 Tropical Mangosteen", "icon": "\ud83c\udf47", "color": "#651A85", "badge": "Teh Ekstrak Kulit Manggis", "p1": "Tropical Mangosteen kami adalah perayaan kebaikan alam yang diperbarui. Diracik cermat dari kulit Manggis pilihan yang dikeringkan, menghadirkan seduhan herbal kaya antioksidan dan ramah lingkungan. Rayakan siklus alam dan nikmati kesegaran tropis di setiap cangkir.", "p2": "Berawal dari kepedulian terhadap ratusan ribu ton kulit buah yang terbuang sia-sia, KulitYea mengolah kembali kulit buah pilihan menjadi seduhan herbal fungsional kaya antioksidan. Setiap cangkir turut mendukung petani lokal dan mengurangi emisi di bumi kita.", "fact_title": "Tahukah kamu?", "fact_body": "Rona ungu gelap alami pada teh ini 100% berasal dari ekstrak kulit manggis pilihan! Nutrisi alaminya siap meningkatkan sistem kekebalan tubuh dan menjaga kesehatan kulitmu dari dalam.", "steps": ["Masukan 1 kantong celup KulitYea ke dalam cangkir", "Tuangkan air panas ke dalam cangkir (\u00b1200ml)", "Diamkan selama 3 - 5 menit agar aroma terekstraksi optimal", "Nikmati selagi hangat"], "ingredients": "Kulit Manggis Pilihan (100% Alami)", "producer": "Tim LakuDong!, Bandung - Indonesia", "storage": "Simpan di tempat kering dan sejuk."}, "salak": {"title": "KulitYea \u2014 Tropical Snakeskin Fruit", "icon": "\ud83c\udf30", "color": "#735346", "badge": "Teh Ekstrak Kulit Salak", "p1": "Tropical SnakeSkin Fruit kami adalah perayaan kebaikan alam yang diperbarui. Diracik cermat dari kulit Salak pilihan yang dikeringkan, menghadirkan seduhan herbal kaya antioksidan dan ramah lingkungan. Rayakan siklus alam dan nikmati kesegaran tropis di setiap cangkir.", "p2": "Berawal dari kepedulian terhadap ratusan ribu ton kulit buah yang terbuang sia-sia, KulitYea mengolah kembali kulit buah pilihan menjadi seduhan herbal fungsional kaya antioksidan. Setiap cangkir turut mendukung petani lokal dan mengurangi emisi di bumi kita.", "fact_title": "Tahukah kamu?", "fact_body": "Aroma unik alami pada teh ini 100% berasal dari ekstrak kulit salak asli! Selain memberikan rasa sedikit manis dan kaya, nutrisi alaminya siap menjaga kesehatan pencernaan dan memberikan rasa nyaman sepanjang hari.", "steps": ["Masukan 1 kantong celup KulitYea ke dalam cangkir", "Tuangkan air panas ke dalam cangkir (\u00b1200ml)", "Diamkan selama 3 - 5 menit agar aroma terekstraksi optimal", "Nikmati selagi hangat"], "ingredients": "Kulit Salak Pilihan (100% Alami)", "producer": "Tim LakuDong!, Bandung - Indonesia", "storage": "Simpan di tempat kering dan sejuk."}};
+    let curVariant = 'orange';
     let autoRotate = false;
-    let isLidOpen = false;
     let isMaximized = false;
 
-    const boxWorld = document.getElementById('boxWorld');
-    const viewport = document.getElementById('viewport');
-    const angleDisplay = document.getElementById('angleDisplay');
-    const faceFront = document.getElementById('faceFront');
-    const faceBack = document.getElementById('faceBack');
-    const faceRight = document.getElementById('faceRight');
-    const faceLeft = document.getElementById('faceLeft');
-    const faceTop = document.getElementById('faceTop');
-    const faceBottom = document.getElementById('faceBottom');
-    const productTitle = document.getElementById('productTitle');
-    const brandIcon = document.getElementById('brandIcon');
-    const mainBody = document.getElementById('mainBody');
+    // Three.js setup
+    const canvas = document.getElementById('canvas3d');
+    const renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true, alpha: true, powerPreference: "high-performance" });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.shadowMap.enabled = true;
+    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 
-    function updateTransform() {
-      const finalZoom = isMaximized ? zoom * 1.25 : zoom;
-      boxWorld.style.transform = `scale3d(${finalZoom}, ${finalZoom}, ${finalZoom}) rotateX(${rotX}deg) rotateY(${rotY}deg)`;
-      angleDisplay.textContent = `${Math.round(rotX)}°, ${Math.round(rotY)}°`;
+    const scene = new THREE.Scene();
+    scene.background = new THREE.Color(0x0f172a);
+
+    const camera = new THREE.PerspectiveCamera(40, window.innerWidth / window.innerHeight, 0.1, 100);
+    camera.position.set(0.65, 0.45, 1.4);
+
+    const controls = new THREE.OrbitControls(camera, canvas);
+    controls.enableDamping = true;
+    controls.dampingFactor = 0.05;
+    controls.maxDistance = 3.5;
+    controls.minDistance = 0.5;
+    controls.target.set(0, 0, 0);
+
+    // Studio Lights
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.7);
+    scene.add(ambientLight);
+
+    const keyLight = new THREE.DirectionalLight(0xfff7ed, 1.2);
+    keyLight.position.set(2, 3, 2.5);
+    keyLight.castShadow = true;
+    keyLight.shadow.mapSize.width = 2048;
+    keyLight.shadow.mapSize.height = 2048;
+    keyLight.shadow.bias = -0.0001;
+    scene.add(keyLight);
+
+    const fillLight = new THREE.DirectionalLight(0xe0f2fe, 0.6);
+    fillLight.position.set(-2, 1.5, 2);
+    scene.add(fillLight);
+
+    const rimLight = new THREE.DirectionalLight(0xffffff, 0.8);
+    rimLight.position.set(0, 2, -2.5);
+    scene.add(rimLight);
+
+    // Studio Floor Pedestal & Shadow
+    const floorGeo = new THREE.CylinderGeometry(1.2, 1.2, 0.02, 64);
+    const floorMat = new THREE.MeshStandardMaterial({ color: 0x1e293b, roughness: 0.4, metalness: 0.1 });
+    const floor = new THREE.Mesh(floorGeo, floorMat);
+    floor.position.y = -0.52;
+    floor.receiveShadow = true;
+    scene.add(floor);
+
+    // Box Geometry: W: 0.55, H: 1.0, D: 0.55 (Real ratio 1 : 1.8 : 1)
+    const boxGeo = new THREE.BoxGeometry(0.55, 1.0, 0.55);
+    
+    // Texture Loader with Maximum Anisotropic Filtering
+    const maxAnisotropy = renderer.capabilities.getMaxAnisotropy();
+    const texLoader = new THREE.TextureLoader();
+
+    function loadHQTex(url) {
+      const t = texLoader.load(url);
+      t.anisotropy = maxAnisotropy;
+      t.minFilter = THREE.LinearMipmapLinearFilter;
+      t.magFilter = THREE.LinearFilter;
+      t.generateMipmaps = true;
+      return t;
     }
 
+    let boxMesh = null;
+    let materialsMap = {};
+
+    function initBox() {
+      const mats = [
+        new THREE.MeshStandardMaterial({ map: loadHQTex('textures/orange_side_right_hd.png'), roughness: 0.45 }), // +X Right
+        new THREE.MeshStandardMaterial({ map: loadHQTex('textures/orange_side_left_hd.png'), roughness: 0.45 }),  // -X Left
+        new THREE.MeshStandardMaterial({ map: loadHQTex('textures/orange_top_hd.png'), roughness: 0.45 }),        // +Y Top
+        new THREE.MeshStandardMaterial({ map: loadHQTex('textures/orange_bottom_hd.png'), roughness: 0.45 }),     // -Y Bottom
+        new THREE.MeshStandardMaterial({ map: loadHQTex('textures/orange_front_hd.png'), roughness: 0.45 }),      // +Z Front
+        new THREE.MeshStandardMaterial({ map: loadHQTex('textures/orange_back_hd.png'), roughness: 0.45 })       // -Z Back
+      ];
+
+      boxMesh = new THREE.Mesh(boxGeo, mats);
+      boxMesh.castShadow = true;
+      boxMesh.receiveShadow = true;
+      boxMesh.position.y = 0;
+      scene.add(boxMesh);
+    }
+    initBox();
+
+    // Variant Switcher
+    function setVariant(key) {
+      if (!VARIANTS_DATA[key]) return;
+      curVariant = key;
+      const data = VARIANTS_DATA[key];
+
+      // Update 3D box textures
+      boxMesh.material[0].map = loadHQTex(`textures/${key}_side_right_hd.png`);
+      boxMesh.material[1].map = loadHQTex(`textures/${key}_side_left_hd.png`);
+      boxMesh.material[2].map = loadHQTex(`textures/${key}_top_hd.png`);
+      boxMesh.material[3].map = loadHQTex(`textures/${key}_bottom_hd.png`);
+      boxMesh.material[4].map = loadHQTex(`textures/${key}_front_hd.png`);
+      boxMesh.material[5].map = loadHQTex(`textures/${key}_back_hd.png`);
+      boxMesh.material.forEach(m => m.needsUpdate = true);
+
+      // Header updates
+      document.getElementById('vTitle').textContent = data.title;
+      document.getElementById('vIcon').textContent = data.icon;
+
+      // Drawer updates
+      document.getElementById('dTitle').textContent = data.title;
+      document.getElementById('dIcon').textContent = data.icon;
+      document.getElementById('dBadge').textContent = data.badge;
+      document.getElementById('dP1').textContent = data.p1;
+      document.getElementById('dP2').textContent = data.p2;
+      document.getElementById('dFactTitle').textContent = data.fact_title;
+      document.getElementById('dFactBody').textContent = data.fact_body;
+      document.getElementById('dIngredients').textContent = data.ingredients;
+      document.getElementById('dProducer').textContent = data.producer;
+      document.getElementById('dStorage').textContent = data.storage;
+
+      const stepsList = document.getElementById('dSteps');
+      stepsList.innerHTML = '';
+      data.steps.forEach(s => {
+        const li = document.createElement('li');
+        li.textContent = s;
+        stepsList.appendChild(li);
+      });
+
+      // Buttons
+      ['orange', 'dragonfruit', 'mangosteen', 'salak'].forEach(k => {
+        const b = document.getElementById(`btn-${k}`);
+        if (k === key) {
+          b.className = 'px-2.5 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all bg-amber-500 text-white shadow-md';
+        } else {
+          b.className = 'px-2.5 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all text-slate-400 hover:text-white';
+        }
+      });
+    }
+
+    // Camera animation
+    let targetPos = null;
+    function flyTo(x, y, z) {
+      targetPos = new THREE.Vector3(x, y, z);
+      autoRotate = false;
+      document.getElementById('rotText').textContent = 'Putar Otomatis';
+      document.getElementById('rotIcon').textContent = '▶️';
+    }
+
+    function toggleAutoRotate() {
+      autoRotate = !autoRotate;
+      document.getElementById('rotText').textContent = autoRotate ? 'Jeda' : 'Putar Otomatis';
+      document.getElementById('rotIcon').textContent = autoRotate ? '⏸️' : '▶️';
+      document.getElementById('maxAutoLabel').textContent = autoRotate ? 'Jeda' : 'Putar';
+    }
+
+    // Maximize / Fullscreen
     function toggleMaximize() {
       isMaximized = !isMaximized;
-      mainBody.classList.toggle('is-maximized', isMaximized);
-
+      document.body.classList.toggle('is-maximized', isMaximized);
       if (isMaximized) {
         if (document.documentElement.requestFullscreen && !document.fullscreenElement) {
           document.documentElement.requestFullscreen().catch(() => {});
@@ -442,180 +401,74 @@
           document.exitFullscreen().catch(() => {});
         }
       }
-
-      updateTransform();
+      setTimeout(onResize, 100);
     }
 
     window.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape' && isMaximized) {
-        toggleMaximize();
+      if (e.key === 'Escape') {
+        if (document.getElementById('readerDrawer').classList.contains('open')) {
+          closeReader();
+        } else if (isMaximized) {
+          toggleMaximize();
+        }
       }
     });
 
-    document.addEventListener('fullscreenchange', () => {
-      if (!document.fullscreenElement && isMaximized) {
-        isMaximized = false;
-        mainBody.classList.remove('is-maximized');
-        updateTransform();
-      }
-    });
-
-    function selectVariant(key) {
-      if (!TITLES[key]) return;
-      currentVariant = key;
-      const meta = TITLES[key];
-
-      // Clean single-layer 1200x2160 textures
-      const cacheBust = '?v=3';
-      faceFront.style.backgroundImage = `url("textures/${key}_front_hd.png${cacheBust}")`;
-      faceBack.style.backgroundImage = `url("textures/${key}_back_hd.png${cacheBust}")`;
-      faceRight.style.backgroundImage = `url("textures/${key}_side_right_hd.png${cacheBust}")`;
-      faceLeft.style.backgroundImage = `url("textures/${key}_side_left_hd.png${cacheBust}")`;
-      faceTop.style.backgroundImage = `url("textures/${key}_top_hd.png${cacheBust}")`;
-      faceBottom.style.backgroundImage = `url("textures/${key}_bottom_hd.png${cacheBust}")`;
-
-      // Update UI Header
-      productTitle.textContent = `KulitYea — ${meta.title}`;
-      brandIcon.textContent = meta.icon;
-
-      document.querySelectorAll('.variant-btn').forEach(btn => {
-        btn.className = 'variant-btn px-2.5 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all text-slate-400 hover:text-white';
-      });
-      const activeBtn = document.getElementById(`btn-${key}`);
-      if (activeBtn) {
-        activeBtn.className = 'variant-btn px-2.5 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all bg-amber-500 text-white shadow-md';
-      }
+    // Reader Drawer
+    function openReader() {
+      document.getElementById('readerDrawer').classList.add('open');
+    }
+    function closeReader() {
+      document.getElementById('readerDrawer').classList.remove('open');
     }
 
-    function setAngle(x, y) {
-      rotX = x;
-      rotY = y;
-      updateTransform();
-      autoRotate = false;
-      document.getElementById('autoRotateText').textContent = 'Putar Otomatis';
-      document.getElementById('autoRotateIcon').textContent = '▶️';
-      document.getElementById('maxAutoText').textContent = 'Putar';
-      document.getElementById('maxAutoIcon').textContent = '▶️';
-    }
-
-    function setZoom(val) {
-      zoom = parseFloat(val);
-      updateTransform();
-    }
-
-    function toggleAutoRotate() {
-      autoRotate = !autoRotate;
-      const text = document.getElementById('autoRotateText');
-      const icon = document.getElementById('autoRotateIcon');
-      const maxText = document.getElementById('maxAutoText');
-      const maxIcon = document.getElementById('maxAutoIcon');
-
-      if (autoRotate) {
-        text.textContent = 'Jeda Putaran';
-        icon.textContent = '⏸️';
-        maxText.textContent = 'Jeda';
-        maxIcon.textContent = '⏸️';
+    function setTheme(theme) {
+      if (theme === 'light') {
+        scene.background.set(0xf1f5f9);
+        floor.material.color.set(0xe2e8f0);
+        ambientLight.intensity = 0.9;
+      } else if (theme === 'warm') {
+        scene.background.set(0x27170c);
+        floor.material.color.set(0x3a2313);
+        ambientLight.intensity = 0.8;
       } else {
-        text.textContent = 'Putar Otomatis';
-        icon.textContent = '▶️';
-        maxText.textContent = 'Putar';
-        maxIcon.textContent = '▶️';
+        scene.background.set(0x0f172a);
+        floor.material.color.set(0x1e293b);
+        ambientLight.intensity = 0.7;
       }
     }
 
-    function toggleLid() {
-      isLidOpen = !isLidOpen;
-      faceTop.classList.toggle('lid-open', isLidOpen);
-      document.getElementById('lidText').textContent = isLidOpen ? 'Tutup Box' : 'Buka Tutup Box';
+    // Resize
+    function onResize() {
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
     }
+    window.addEventListener('resize', onResize);
 
-    function setStudioTheme(mode) {
-      if (mode === 'light') {
-        mainBody.className = 'bg-slate-100 text-slate-900 min-h-screen p-3 md:p-5 flex flex-col justify-between transition-colors duration-500';
-      } else if (mode === 'warm') {
-        mainBody.className = 'bg-amber-950/90 text-amber-100 min-h-screen p-3 md:p-5 flex flex-col justify-between transition-colors duration-500';
-      } else {
-        mainBody.className = 'bg-slate-900 text-slate-100 min-h-screen p-3 md:p-5 flex flex-col justify-between transition-colors duration-500';
+    // Animation Render Loop
+    function animate() {
+      requestAnimationFrame(animate);
+
+      if (autoRotate && boxMesh) {
+        boxMesh.rotation.y += 0.008;
       }
-      if (isMaximized) {
-        mainBody.classList.add('is-maximized');
+
+      if (targetPos) {
+        camera.position.lerp(targetPos, 0.08);
+        controls.target.lerp(new THREE.Vector3(0, 0, 0), 0.08);
+        if (camera.position.distanceTo(targetPos) < 0.01) {
+          targetPos = null;
+        }
       }
+
+      controls.update();
+      renderer.render(scene, camera);
     }
+    animate();
 
-    function tick() {
-      if (autoRotate) {
-        rotY = (rotY + 0.4) % 360;
-        updateTransform();
-      }
-      requestAnimationFrame(tick);
-    }
-    requestAnimationFrame(tick);
-
-    viewport.addEventListener('mousedown', (e) => {
-      isDragging = true;
-      startX = e.clientX;
-      startY = e.clientY;
-    });
-
-    window.addEventListener('mousemove', (e) => {
-      if (!isDragging) return;
-      const deltaX = e.clientX - startX;
-      const deltaY = e.clientY - startY;
-      startX = e.clientX;
-      startY = e.clientY;
-
-      rotY += deltaX * 0.45;
-      rotX -= deltaY * 0.45;
-      rotX = Math.max(-90, Math.min(90, rotX));
-      autoRotate = false;
-      document.getElementById('autoRotateText').textContent = 'Putar Otomatis';
-      document.getElementById('autoRotateIcon').textContent = '▶️';
-      document.getElementById('maxAutoText').textContent = 'Putar';
-      document.getElementById('maxAutoIcon').textContent = '▶️';
-      updateTransform();
-    });
-
-    window.addEventListener('mouseup', () => isDragging = false);
-
-    viewport.addEventListener('touchstart', (e) => {
-      if (e.touches.length === 1) {
-        isDragging = true;
-        startX = e.touches[0].clientX;
-        startY = e.touches[0].clientY;
-      }
-    }, { passive: true });
-
-    window.addEventListener('touchmove', (e) => {
-      if (!isDragging || e.touches.length !== 1) return;
-      const deltaX = e.touches[0].clientX - startX;
-      const deltaY = e.touches[0].clientY - startY;
-      startX = e.touches[0].clientX;
-      startY = e.touches[0].clientY;
-
-      rotY += deltaX * 0.45;
-      rotX -= deltaY * 0.45;
-      rotX = Math.max(-90, Math.min(90, rotX));
-      autoRotate = false;
-      document.getElementById('autoRotateText').textContent = 'Putar Otomatis';
-      document.getElementById('autoRotateIcon').textContent = '▶️';
-      document.getElementById('maxAutoText').textContent = 'Putar';
-      document.getElementById('maxAutoIcon').textContent = '▶️';
-      updateTransform();
-    }, { passive: true });
-
-    window.addEventListener('touchend', () => isDragging = false);
-
-    viewport.addEventListener('wheel', (e) => {
-      e.preventDefault();
-      zoom += e.deltaY * -0.0012;
-      zoom = Math.min(Math.max(0.6, zoom), 2.4);
-      const zoomRange = document.getElementById('zoomRange');
-      if (zoomRange) zoomRange.value = zoom;
-      updateTransform();
-    }, { passive: false });
-
-    selectVariant('orange');
-    updateTransform();
+    // Initialize with orange
+    setVariant('orange');
   </script>
 </body>
 </html>
