@@ -19,6 +19,7 @@
       perspective: 1500px;
       perspective-origin: 50% 45%;
       touch-action: none;
+      transition: all 0.4s ease;
     }
 
     .box-world {
@@ -164,7 +165,7 @@
       pointer-events: none;
     }
 
-    /* Vector Typography Overlay for 100% Crisp, Vector-Sharp Text */
+    /* Vector Typography Overlay */
     .vector-text-layer {
       position: absolute;
       inset: 0;
@@ -181,12 +182,52 @@
     .vector-text-layer.hidden-overlay {
       opacity: 0;
     }
+
+    /* ========================================= */
+    /* MAXIMIZE / FULLSCREEN MODE STYLES         */
+    /* ========================================= */
+    body.is-maximized {
+      padding: 0 !important;
+      margin: 0 !important;
+      overflow: hidden !important;
+    }
+
+    body.is-maximized #appHeader,
+    body.is-maximized #appFooter,
+    body.is-maximized #topBadgeBar,
+    body.is-maximized #floatingControls {
+      display: none !important;
+    }
+
+    body.is-maximized #mainContainer {
+      position: fixed !important;
+      inset: 0 !important;
+      width: 100vw !important;
+      height: 100vh !important;
+      max-width: 100vw !important;
+      margin: 0 !important;
+      padding: 0 !important;
+      z-index: 100 !important;
+    }
+
+    body.is-maximized .scene-viewport {
+      width: 100vw !important;
+      height: 100vh !important;
+    }
+
+    /* Minimal floating controls in Maximize mode */
+    #maximizeOverlayControls {
+      display: none;
+    }
+    body.is-maximized #maximizeOverlayControls {
+      display: flex;
+    }
   </style>
 </head>
 <body class="bg-slate-900 text-slate-100 min-h-screen p-3 md:p-5 flex flex-col justify-between transition-colors duration-500" id="mainBody">
 
-  <!-- HEADER -->
-  <header class="flex flex-wrap items-center justify-between gap-3 max-w-6xl mx-auto w-full mb-2 bg-slate-800/85 backdrop-blur border border-slate-700/60 p-3 rounded-2xl shadow-xl">
+  <!-- HEADER (hidden in maximize mode) -->
+  <header id="appHeader" class="flex flex-wrap items-center justify-between gap-3 max-w-6xl mx-auto w-full mb-2 bg-slate-800/85 backdrop-blur border border-slate-700/60 p-3 rounded-2xl shadow-xl transition-all duration-300">
     <div class="flex items-center gap-3">
       <div class="w-10 h-10 rounded-xl bg-amber-500/20 border border-amber-500/40 flex items-center justify-center text-xl shadow-inner" id="brandIcon">
         🍊
@@ -196,7 +237,7 @@
           <h1 class="text-base md:text-lg font-bold text-white tracking-wide" id="productTitle">KulitYea &mdash; Tropical Orange</h1>
           <span class="px-2 py-0.5 rounded-full text-[11px] font-semibold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">Ultra HD</span>
         </div>
-        <p class="text-xs text-slate-400">Kemasan Teh Kulit Buah Alami &bull; 25 Kantong Celup &bull; 4X Super-Sampled &amp; Vector Text</p>
+        <p class="text-xs text-slate-400">Kemasan Teh Kulit Buah Alami &bull; 25 Kantong Celup &bull; Studio 3D Prototype</p>
       </div>
     </div>
 
@@ -218,18 +259,32 @@
   </header>
 
   <!-- 3D VIEWPORT CONTAINER -->
-  <main class="relative flex-1 max-w-6xl mx-auto w-full flex flex-col items-center justify-center my-1">
+  <main id="mainContainer" class="relative flex-1 max-w-6xl mx-auto w-full flex flex-col items-center justify-center my-1">
     
-    <!-- Top Hints / Status Bar -->
-    <div class="absolute top-2 left-4 z-20 flex items-center gap-2">
+    <!-- Top Hints / Status Bar (hidden in maximize mode) -->
+    <div id="topBadgeBar" class="absolute top-2 left-4 z-20 flex items-center gap-2">
       <button onclick="toggleVectorMode()" id="btnVectorMode" class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/40 text-xs font-semibold shadow-md transition-all">
         <span>✨</span> <span id="vectorModeLabel">Teks Tajam Ultra-HD: ON</span>
       </button>
     </div>
 
-    <div class="absolute top-2 right-4 z-20 hidden md:flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-800/80 backdrop-blur border border-slate-700/60 text-xs text-slate-400 shadow-lg">
+    <!-- Active Angle Indicator -->
+    <div class="absolute top-2 right-4 z-20 hidden md:flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-800/80 backdrop-blur border border-slate-700/60 text-xs text-slate-400 shadow-lg" id="angleBadge">
       <span>Rotasi:</span>
       <span class="font-mono text-amber-400 font-semibold" id="angleDisplay">-14&deg;, -32&deg;</span>
+    </div>
+
+    <!-- MAXIMIZE FLOATING EXIT & CONTROLS (Only visible when Maximized) -->
+    <div id="maximizeOverlayControls" class="fixed top-5 right-5 z-50 flex items-center gap-2 transition-all">
+      <button onclick="toggleAutoRotate()" id="btnMaxAutoRotate" class="px-3.5 py-2 rounded-xl bg-slate-800/75 hover:bg-slate-700/90 text-slate-200 border border-slate-700/80 backdrop-blur-md shadow-2xl text-xs font-semibold flex items-center gap-1.5 transition-all">
+        <span id="maxAutoIcon">▶️</span> <span id="maxAutoText">Putar</span>
+      </button>
+      <button onclick="toggleLid()" class="px-3.5 py-2 rounded-xl bg-slate-800/75 hover:bg-slate-700/90 text-slate-200 border border-slate-700/80 backdrop-blur-md shadow-2xl text-xs font-semibold flex items-center gap-1.5 transition-all">
+        <span>📦</span> <span>Buka Tutup</span>
+      </button>
+      <button onclick="toggleMaximize()" class="px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold border border-amber-400 backdrop-blur-md shadow-2xl text-xs flex items-center gap-2 transition-all">
+        <span>🗗</span> <span>Keluar Fullscreen (ESC)</span>
+      </button>
     </div>
 
     <!-- 3D Canvas Area -->
@@ -339,8 +394,8 @@
 
     </div>
 
-    <!-- FLOATING QUICK VIEW CONTROLS -->
-    <div class="w-full max-w-4xl mx-auto px-2 flex flex-col gap-2 z-20">
+    <!-- FLOATING QUICK VIEW CONTROLS (hidden in maximize mode) -->
+    <div id="floatingControls" class="w-full max-w-4xl mx-auto px-2 flex flex-col gap-2 z-20">
       
       <!-- Angle Buttons Bar -->
       <div class="flex flex-wrap items-center justify-center gap-1.5 p-2 bg-slate-800/90 backdrop-blur border border-slate-700/60 rounded-2xl shadow-xl">
@@ -371,8 +426,12 @@
       <!-- Feature Toggles Bar -->
       <div class="flex flex-wrap items-center justify-between gap-3 p-2.5 bg-slate-800/80 backdrop-blur border border-slate-700/60 rounded-2xl shadow-lg text-xs">
         
-        <!-- Left: Auto-rotate & Lid Open -->
+        <!-- Left: Auto-rotate, Lid Open & MAXIMIZE BUTTON -->
         <div class="flex items-center gap-2">
+          <button onclick="toggleMaximize()" id="btnMaximize" class="px-3 py-1.5 rounded-xl font-bold bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-slate-950 shadow-md transition-all flex items-center gap-1.5">
+            <span>⛶</span> <span>Maximize (Layar Penuh)</span>
+          </button>
+
           <button onclick="toggleAutoRotate()" id="btnAutoRotate" class="px-3 py-1.5 rounded-xl font-semibold bg-slate-700/70 hover:bg-slate-600 text-slate-200 transition-all flex items-center gap-1.5">
             <span id="autoRotateIcon">▶️</span> <span id="autoRotateText">Putar Otomatis</span>
           </button>
@@ -385,7 +444,7 @@
         <!-- Middle: Zoom Slider -->
         <div class="flex items-center gap-2">
           <span class="text-slate-400">Zoom:</span>
-          <input type="range" min="0.6" max="2.0" step="0.05" value="1.0" oninput="setZoom(this.value)" class="w-28 accent-amber-500 cursor-pointer">
+          <input type="range" min="0.6" max="2.4" step="0.05" value="1.0" id="zoomRange" oninput="setZoom(this.value)" class="w-28 accent-amber-500 cursor-pointer">
         </div>
 
         <!-- Right: Studio Background Switcher -->
@@ -402,8 +461,8 @@
 
   </main>
 
-  <!-- FOOTER -->
-  <footer class="max-w-6xl mx-auto w-full mt-1 bg-slate-800/80 backdrop-blur border border-slate-700/60 p-3 rounded-2xl flex flex-wrap items-center justify-between gap-3 text-xs text-slate-400">
+  <!-- FOOTER (hidden in maximize mode) -->
+  <footer id="appFooter" class="max-w-6xl mx-auto w-full mt-1 bg-slate-800/80 backdrop-blur border border-slate-700/60 p-3 rounded-2xl flex flex-wrap items-center justify-between gap-3 text-xs text-slate-400 transition-all duration-300">
     <div class="flex items-center gap-4">
       <span>📐 <strong>Dimensi Kemasan:</strong> 7.5 &times; 7.5 &times; 13.5 cm</span>
       <span class="hidden sm:inline">&bull;</span>
@@ -430,6 +489,7 @@
     let autoRotate = false;
     let isLidOpen = false;
     let vectorMode = true;
+    let isMaximized = false;
 
     const boxWorld = document.getElementById('boxWorld');
     const viewport = document.getElementById('viewport');
@@ -457,9 +517,47 @@
     const vtLeftIngredients = document.getElementById('vtLeftIngredients');
 
     function updateTransform() {
-      boxWorld.style.transform = `scale3d(${zoom}, ${zoom}, ${zoom}) rotateX(${rotX}deg) rotateY(${rotY}deg)`;
+      const finalZoom = isMaximized ? zoom * 1.25 : zoom;
+      boxWorld.style.transform = `scale3d(${finalZoom}, ${finalZoom}, ${finalZoom}) rotateX(${rotX}deg) rotateY(${rotY}deg)`;
       angleDisplay.textContent = `${Math.round(rotX)}°, ${Math.round(rotY)}°`;
     }
+
+    // ===================================
+    // MAXIMIZE TOGGLE FUNCTION
+    // ===================================
+    function toggleMaximize() {
+      isMaximized = !isMaximized;
+      mainBody.classList.toggle('is-maximized', isMaximized);
+
+      // Try browser fullscreen API if user gestures
+      if (isMaximized) {
+        if (document.documentElement.requestFullscreen && !document.fullscreenElement) {
+          document.documentElement.requestFullscreen().catch(() => {});
+        }
+      } else {
+        if (document.exitFullscreen && document.fullscreenElement) {
+          document.exitFullscreen().catch(() => {});
+        }
+      }
+
+      updateTransform();
+    }
+
+    // Press ESC to exit maximize
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && isMaximized) {
+        toggleMaximize();
+      }
+    });
+
+    // Listen for browser fullscreen exit (e.g. F11 or browser esc)
+    document.addEventListener('fullscreenchange', () => {
+      if (!document.fullscreenElement && isMaximized) {
+        isMaximized = false;
+        mainBody.classList.remove('is-maximized');
+        updateTransform();
+      }
+    });
 
     function selectVariant(key) {
       if (!VARIANTS_META[key]) return;
@@ -511,6 +609,8 @@
       autoRotate = false;
       document.getElementById('autoRotateText').textContent = 'Putar Otomatis';
       document.getElementById('autoRotateIcon').textContent = '▶️';
+      document.getElementById('maxAutoText').textContent = 'Putar';
+      document.getElementById('maxAutoIcon').textContent = '▶️';
     }
 
     function setZoom(val) {
@@ -522,12 +622,19 @@
       autoRotate = !autoRotate;
       const text = document.getElementById('autoRotateText');
       const icon = document.getElementById('autoRotateIcon');
+      const maxText = document.getElementById('maxAutoText');
+      const maxIcon = document.getElementById('maxAutoIcon');
+
       if (autoRotate) {
         text.textContent = 'Jeda Putaran';
         icon.textContent = '⏸️';
+        maxText.textContent = 'Jeda';
+        maxIcon.textContent = '⏸️';
       } else {
         text.textContent = 'Putar Otomatis';
         icon.textContent = '▶️';
+        maxText.textContent = 'Putar';
+        maxIcon.textContent = '▶️';
       }
     }
 
@@ -544,6 +651,9 @@
         mainBody.className = 'bg-amber-950/90 text-amber-100 min-h-screen p-3 md:p-5 flex flex-col justify-between transition-colors duration-500';
       } else {
         mainBody.className = 'bg-slate-900 text-slate-100 min-h-screen p-3 md:p-5 flex flex-col justify-between transition-colors duration-500';
+      }
+      if (isMaximized) {
+        mainBody.classList.add('is-maximized');
       }
     }
 
@@ -575,6 +685,8 @@
       autoRotate = false;
       document.getElementById('autoRotateText').textContent = 'Putar Otomatis';
       document.getElementById('autoRotateIcon').textContent = '▶️';
+      document.getElementById('maxAutoText').textContent = 'Putar';
+      document.getElementById('maxAutoIcon').textContent = '▶️';
       updateTransform();
     });
 
@@ -601,6 +713,8 @@
       autoRotate = false;
       document.getElementById('autoRotateText').textContent = 'Putar Otomatis';
       document.getElementById('autoRotateIcon').textContent = '▶️';
+      document.getElementById('maxAutoText').textContent = 'Putar';
+      document.getElementById('maxAutoIcon').textContent = '▶️';
       updateTransform();
     }, { passive: true });
 
@@ -609,7 +723,9 @@
     viewport.addEventListener('wheel', (e) => {
       e.preventDefault();
       zoom += e.deltaY * -0.0012;
-      zoom = Math.min(Math.max(0.6, zoom), 2.2);
+      zoom = Math.min(Math.max(0.6, zoom), 2.4);
+      const zoomRange = document.getElementById('zoomRange');
+      if (zoomRange) zoomRange.value = zoom;
       updateTransform();
     }, { passive: false });
 
