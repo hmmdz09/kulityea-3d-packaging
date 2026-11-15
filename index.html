@@ -13,7 +13,7 @@
       -webkit-user-select: none;
       overflow: hidden;
       font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      background: #0f172a;
+      background: #0b1120;
       color: #f8fafc;
     }
 
@@ -46,12 +46,20 @@
     #readerDrawer.open {
       transform: translateX(0);
     }
+
+    /* Flat 2D Dieline Modal */
+    #dielineModal {
+      display: none;
+    }
+    #dielineModal.open {
+      display: flex;
+    }
   </style>
 </head>
 <body class="w-screen h-screen relative flex flex-col justify-between">
 
   <!-- TOP HEADER -->
-  <header id="topHeader" class="absolute top-3 inset-x-3 md:inset-x-6 max-w-6xl mx-auto z-20 flex flex-wrap items-center justify-between gap-3 bg-slate-900/85 backdrop-blur-md border border-slate-700/60 p-3 rounded-2xl shadow-2xl transition-all">
+  <header id="topHeader" class="absolute top-3 inset-x-3 md:inset-x-6 max-w-6xl mx-auto z-20 flex flex-wrap items-center justify-between gap-3 bg-slate-900/90 backdrop-blur-md border border-slate-700/60 p-3 rounded-2xl shadow-2xl transition-all">
     <div class="flex items-center gap-3">
       <div class="w-10 h-10 rounded-xl bg-amber-500/20 border border-amber-500/40 flex items-center justify-center text-xl shadow-inner" id="vIcon">
         🍊
@@ -59,9 +67,9 @@
       <div>
         <div class="flex items-center gap-2">
           <h1 class="text-sm md:text-base font-bold text-white tracking-wide" id="vTitle">KulitYea &mdash; Tropical Orange</h1>
-          <span class="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">WebGL 3D</span>
+          <span class="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">4K Ultra HD</span>
         </div>
-        <p class="text-[11px] text-slate-400">Drag mouse/layar untuk putar 360&deg; &bull; Scroll untuk Zoom &bull; 25 Tea Bags</p>
+        <p class="text-[11px] text-slate-400">Putar 360&deg; &bull; Klik sudut pandang untuk Zoom Dekat Otomatis &bull; 25 Tea Bags</p>
       </div>
     </div>
 
@@ -87,10 +95,10 @@
     <canvas id="canvas3d"></canvas>
   </main>
 
-  <!-- MAXIMIZE FLOATING EXIT & ACTION BAR (Only in Maximize Mode) -->
+  <!-- MAXIMIZE FLOATING CONTROLS (Only visible in Maximize Mode) -->
   <div id="maximizeControls" class="fixed top-5 right-5 z-40 flex items-center gap-2">
     <button onclick="openReader()" class="px-3.5 py-2 rounded-xl bg-slate-800/80 hover:bg-slate-700 text-slate-200 border border-slate-700 backdrop-blur-md shadow-2xl text-xs font-semibold flex items-center gap-1.5">
-      <span>📖</span> <span>Baca Teks Kemasan</span>
+      <span>📖</span> <span>Baca Teks</span>
     </button>
     <button onclick="toggleAutoRotate()" id="btnMaxAuto" class="px-3.5 py-2 rounded-xl bg-slate-800/80 hover:bg-slate-700 text-slate-200 border border-slate-700 backdrop-blur-md shadow-2xl text-xs font-semibold flex items-center gap-1.5">
       <span>▶️</span> <span id="maxAutoLabel">Putar</span>
@@ -103,42 +111,39 @@
   <!-- FLOATING QUICK CONTROLS (Normal Mode) -->
   <div id="normalControls" class="absolute bottom-14 inset-x-3 md:inset-x-6 max-w-4xl mx-auto z-20 flex flex-col gap-2">
     
-    <!-- Quick Views Bar -->
-    <div class="flex flex-wrap items-center justify-center gap-1.5 p-2 bg-slate-900/90 backdrop-blur-md border border-slate-700/60 rounded-2xl shadow-2xl">
-      <span class="text-xs text-slate-400 font-medium px-2 hidden sm:inline">Sudut Pandang:</span>
-      <button onclick="flyTo(0.65, 0.45, 1.4)" class="px-3 py-1.5 rounded-xl text-xs font-semibold bg-amber-500/20 text-amber-300 border border-amber-500/40 hover:bg-amber-500/30 transition-all flex items-center gap-1">
+    <!-- Quick Views Bar (SMART CLOSE-UP PRESETS) -->
+    <div class="flex flex-wrap items-center justify-center gap-1.5 p-2 bg-slate-900/95 backdrop-blur-md border border-slate-700/60 rounded-2xl shadow-2xl">
+      <span class="text-xs text-amber-400 font-bold px-2 hidden sm:inline">🔍 Zoom Sisi:</span>
+      <button onclick="flyTo(0.55, 0.35, 1.05)" class="px-3 py-1.5 rounded-xl text-xs font-semibold bg-amber-500/20 text-amber-300 border border-amber-500/40 hover:bg-amber-500/30 transition-all flex items-center gap-1">
         <span>📸</span> 3D Studio
       </button>
-      <button onclick="flyTo(0, 0, 1.55)" class="px-3 py-1.5 rounded-xl text-xs font-semibold bg-slate-800/80 hover:bg-slate-700 text-slate-200 transition-all">
-        Depan
+      <button onclick="flyTo(0, 0, 0.88)" class="px-3 py-1.5 rounded-xl text-xs font-semibold bg-slate-800/90 hover:bg-slate-700 text-slate-200 transition-all">
+        Depan (Besar)
       </button>
-      <button onclick="flyTo(-1.55, 0, 0)" class="px-3 py-1.5 rounded-xl text-xs font-semibold bg-slate-800/80 hover:bg-slate-700 text-slate-200 transition-all">
-        ◀️ Kiri (Penyajian)
+      <button onclick="flyTo(-0.85, 0, 0)" class="px-3 py-1.5 rounded-xl text-xs font-bold bg-amber-500/25 text-amber-300 border border-amber-500/30 hover:bg-amber-500/40 transition-all">
+        ◀️ Kiri (Penyajian Jelas)
       </button>
-      <button onclick="flyTo(0, 0, -1.55)" class="px-3 py-1.5 rounded-xl text-xs font-semibold bg-slate-800/80 hover:bg-slate-700 text-slate-200 transition-all">
+      <button onclick="flyTo(0, 0, -0.88)" class="px-3 py-1.5 rounded-xl text-xs font-semibold bg-slate-800/90 hover:bg-slate-700 text-slate-200 transition-all">
         Belakang
       </button>
-      <button onclick="flyTo(1.55, 0, 0)" class="px-3 py-1.5 rounded-xl text-xs font-semibold bg-slate-800/80 hover:bg-slate-700 text-slate-200 transition-all">
-        ▶️ Kanan (Khasiat)
+      <button onclick="flyTo(0.85, 0, 0)" class="px-3 py-1.5 rounded-xl text-xs font-bold bg-amber-500/25 text-amber-300 border border-amber-500/30 hover:bg-amber-500/40 transition-all">
+        ▶️ Kanan (Khasiat Jelas)
       </button>
-      <button onclick="flyTo(0, 1.55, 0.05)" class="px-3 py-1.5 rounded-xl text-xs font-semibold bg-slate-800/80 hover:bg-slate-700 text-slate-200 transition-all">
+      <button onclick="flyTo(0, 0.95, 0.05)" class="px-3 py-1.5 rounded-xl text-xs font-semibold bg-slate-800/90 hover:bg-slate-700 text-slate-200 transition-all">
         Atas
-      </button>
-      <button onclick="flyTo(0, -1.55, 0.05)" class="px-3 py-1.5 rounded-xl text-xs font-semibold bg-slate-800/80 hover:bg-slate-700 text-slate-200 transition-all">
-        Bawah
       </button>
     </div>
 
     <!-- Feature Actions Bar -->
-    <div class="flex flex-wrap items-center justify-between gap-3 p-2.5 bg-slate-900/85 backdrop-blur-md border border-slate-700/60 rounded-2xl shadow-xl text-xs">
+    <div class="flex flex-wrap items-center justify-between gap-3 p-2.5 bg-slate-900/90 backdrop-blur-md border border-slate-700/60 rounded-2xl shadow-xl text-xs">
       
       <div class="flex items-center gap-2">
         <button onclick="toggleMaximize()" class="px-3.5 py-1.5 rounded-xl font-bold bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-slate-950 shadow-md transition-all flex items-center gap-1.5">
           <span>⛶</span> <span>Maximize (Layar Penuh)</span>
         </button>
 
-        <button onclick="openReader()" class="px-3.5 py-1.5 rounded-xl font-semibold bg-emerald-600 hover:bg-emerald-500 text-white shadow-md transition-all flex items-center gap-1.5">
-          <span>📖</span> <span>Detail Teks Kemasan</span>
+        <button onclick="openReader()" class="px-3.5 py-1.5 rounded-xl font-bold bg-emerald-600 hover:bg-emerald-500 text-white shadow-md transition-all flex items-center gap-1.5">
+          <span>📖</span> <span>Teks Lengkap HD</span>
         </button>
 
         <button onclick="toggleAutoRotate()" id="btnAutoRot" class="px-3 py-1.5 rounded-xl font-semibold bg-slate-800/80 hover:bg-slate-700 text-slate-200 transition-all flex items-center gap-1.5">
@@ -147,7 +152,7 @@
       </div>
 
       <div class="flex items-center gap-2 text-slate-400">
-        <span>💡 Pencahayaan:</span>
+        <span>💡 Studio:</span>
         <button onclick="setTheme('dark')" class="w-5 h-5 rounded-full bg-slate-950 border border-slate-600 hover:scale-110" title="Studio Gelap"></button>
         <button onclick="setTheme('light')" class="w-5 h-5 rounded-full bg-slate-200 border border-slate-400 hover:scale-110" title="Studio Terang"></button>
         <button onclick="setTheme('warm')" class="w-5 h-5 rounded-full bg-amber-950 border border-amber-600 hover:scale-110" title="Studio Hangat"></button>
@@ -158,9 +163,9 @@
   </div>
 
   <!-- FOOTER SPECS -->
-  <footer id="bottomFooter" class="absolute bottom-2 inset-x-3 md:inset-x-6 max-w-6xl mx-auto z-20 bg-slate-900/80 backdrop-blur-md border border-slate-700/60 px-4 py-2 rounded-xl flex items-center justify-between text-xs text-slate-400">
+  <footer id="bottomFooter" class="absolute bottom-2 inset-x-3 md:inset-x-6 max-w-6xl mx-auto z-20 bg-slate-900/85 backdrop-blur-md border border-slate-700/60 px-4 py-2 rounded-xl flex items-center justify-between text-xs text-slate-400">
     <div class="flex items-center gap-4">
-      <span>📐 <strong>Ukuran Kemasan:</strong> 7.5 &times; 7.5 &times; 13.5 cm</span>
+      <span>📐 <strong>Ukuran Box:</strong> 7.5 &times; 7.5 &times; 13.5 cm</span>
       <span class="hidden sm:inline">&bull;</span>
       <span>🏷️ Straight Tuck Box (Carton 310gsm)</span>
       <span class="hidden md:inline">&bull;</span>
@@ -231,7 +236,7 @@
   </aside>
 
   <script>
-    const VARIANTS_DATA = {"orange": {"title": "KulitYea \u2014 Tropical Orange", "icon": "\ud83c\udf4a", "color": "#F28522", "badge": "Teh Ekstrak Kulit Jeruk Asli", "p1": "Tropical Orange kami adalah perayaan kebaikan alam yang diperbarui. Diracik cermat dari kulit jeruk pilihan yang dikeringkan, menghadirkan seduhan herbal kaya antioksidan dan ramah lingkungan. Rayakan siklus alam dan nikmati kesegaran tropis di setiap cangkir.", "p2": "Berawal dari kepedulian terhadap ratusan ribu ton kulit buah yang terbuang sia-sia, KulitYea mengolah kembali kulit buah pilihan menjadi seduhan herbal fungsional kaya antioksidan. Setiap cangkir yang kamu nikmati turut mendukung petani lokal dan mengurangi emisi di bumi kita.", "fact_title": "Tahukah kamu?", "fact_body": "Aroma jeruk segar pada teh ini 100% berasal dari ekstrak kulit jeruk asli! Selain memberikan rasa menyegarkan dan cerah, nutrisi alaminya siap meningkatkan mood dan memberi kebahagiaan sepanjang hari.", "steps": ["Masukan 1 kantong celup KulitYea ke dalam cangkir", "Tuangkan air panas ke dalam cangkir (\u00b1200ml)", "Diamkan selama 3 - 5 menit agar aroma dan nutrisi terekstraksi optimal", "Nikmati selagi hangat untuk relaksasi tubuh dan pikiran"], "ingredients": "Kulit Jeruk Pilihan (100% Alami)", "producer": "Tim LakuDong!, Bandung - Indonesia", "storage": "Simpan di tempat kering, sejuk, dan terhindar dari sinar matahari langsung."}, "dragonfruit": {"title": "KulitYea \u2014 Tropical Dragon Fruit", "icon": "\ud83c\udf3a", "color": "#C41263", "badge": "Teh Ekstrak Kulit Buah Naga", "p1": "Tropical Dragon Fruit kami adalah perayaan kebaikan alam yang diperbarui. Diracik cermat dari kulit Buah Naga pilihan yang dikeringkan, menghadirkan seduhan herbal kaya antioksidan dan ramah lingkungan. Rayakan siklus alam dan nikmati kesegaran tropis di setiap cangkir.", "p2": "Berawal dari kepedulian terhadap ratusan ribu ton kulit buah yang terbuang sia-sia, KulitYea mengolah kembali kulit buah pilihan menjadi seduhan herbal fungsional kaya antioksidan. Setiap cangkir turut mendukung petani lokal dan mengurangi emisi di bumi kita.", "fact_title": "Tahukah kamu?", "fact_body": "Rona merah muda alami pada teh ini 100% berasal dari ekstrak kulit buah naga! Selain memberikan rasa yang super lembut, nutrisinya siap membangkitkan mood dan menjaga vitalitasmu dari pagi hingga malam.", "steps": ["Masukan 1 kantong celup KulitYea ke dalam cangkir", "Tuangkan air panas ke dalam cangkir (\u00b1200ml)", "Diamkan selama 3 - 5 menit agar aroma terekstraksi optimal", "Nikmati selagi hangat"], "ingredients": "Kulit Buah Naga Pilihan (100% Alami)", "producer": "Tim LakuDong!, Bandung - Indonesia", "storage": "Simpan di tempat kering dan sejuk."}, "mangosteen": {"title": "KulitYea \u2014 Tropical Mangosteen", "icon": "\ud83c\udf47", "color": "#651A85", "badge": "Teh Ekstrak Kulit Manggis", "p1": "Tropical Mangosteen kami adalah perayaan kebaikan alam yang diperbarui. Diracik cermat dari kulit Manggis pilihan yang dikeringkan, menghadirkan seduhan herbal kaya antioksidan dan ramah lingkungan. Rayakan siklus alam dan nikmati kesegaran tropis di setiap cangkir.", "p2": "Berawal dari kepedulian terhadap ratusan ribu ton kulit buah yang terbuang sia-sia, KulitYea mengolah kembali kulit buah pilihan menjadi seduhan herbal fungsional kaya antioksidan. Setiap cangkir turut mendukung petani lokal dan mengurangi emisi di bumi kita.", "fact_title": "Tahukah kamu?", "fact_body": "Rona ungu gelap alami pada teh ini 100% berasal dari ekstrak kulit manggis pilihan! Nutrisi alaminya siap meningkatkan sistem kekebalan tubuh dan menjaga kesehatan kulitmu dari dalam.", "steps": ["Masukan 1 kantong celup KulitYea ke dalam cangkir", "Tuangkan air panas ke dalam cangkir (\u00b1200ml)", "Diamkan selama 3 - 5 menit agar aroma terekstraksi optimal", "Nikmati selagi hangat"], "ingredients": "Kulit Manggis Pilihan (100% Alami)", "producer": "Tim LakuDong!, Bandung - Indonesia", "storage": "Simpan di tempat kering dan sejuk."}, "salak": {"title": "KulitYea \u2014 Tropical Snakeskin Fruit", "icon": "\ud83c\udf30", "color": "#735346", "badge": "Teh Ekstrak Kulit Salak", "p1": "Tropical SnakeSkin Fruit kami adalah perayaan kebaikan alam yang diperbarui. Diracik cermat dari kulit Salak pilihan yang dikeringkan, menghadirkan seduhan herbal kaya antioksidan dan ramah lingkungan. Rayakan siklus alam dan nikmati kesegaran tropis di setiap cangkir.", "p2": "Berawal dari kepedulian terhadap ratusan ribu ton kulit buah yang terbuang sia-sia, KulitYea mengolah kembali kulit buah pilihan menjadi seduhan herbal fungsional kaya antioksidan. Setiap cangkir turut mendukung petani lokal dan mengurangi emisi di bumi kita.", "fact_title": "Tahukah kamu?", "fact_body": "Aroma unik alami pada teh ini 100% berasal dari ekstrak kulit salak asli! Selain memberikan rasa sedikit manis dan kaya, nutrisi alaminya siap menjaga kesehatan pencernaan dan memberikan rasa nyaman sepanjang hari.", "steps": ["Masukan 1 kantong celup KulitYea ke dalam cangkir", "Tuangkan air panas ke dalam cangkir (\u00b1200ml)", "Diamkan selama 3 - 5 menit agar aroma terekstraksi optimal", "Nikmati selagi hangat"], "ingredients": "Kulit Salak Pilihan (100% Alami)", "producer": "Tim LakuDong!, Bandung - Indonesia", "storage": "Simpan di tempat kering dan sejuk."}};
+    const VARIANTS_DATA = {"orange": {"title": "KulitYea \u2014 Tropical Orange", "icon": "\ud83c\udf4a", "color": "#F28522", "badge": "Teh Ekstrak Kulit Jeruk Asli", "dieline_img": "textures/orange_dieline.png", "p1": "Tropical Orange kami adalah perayaan kebaikan alam yang diperbarui. Diracik cermat dari kulit jeruk pilihan yang dikeringkan, menghadirkan seduhan herbal kaya antioksidan dan ramah lingkungan. Rayakan siklus alam dan nikmati kesegaran tropis di setiap cangkir.", "p2": "Berawal dari kepedulian terhadap ratusan ribu ton kulit buah yang terbuang sia-sia, KulitYea mengolah kembali kulit buah pilihan menjadi seduhan herbal fungsional kaya antioksidan. Setiap cangkir yang kamu nikmati turut mendukung petani lokal dan mengurangi emisi di bumi kita.", "fact_title": "Tahukah kamu? \ud83c\udf4a", "fact_body": "Aroma jeruk segar pada teh ini 100% berasal dari ekstrak kulit jeruk asli! Selain memberikan rasa menyegarkan dan cerah, nutrisi alaminya siap meningkatkan mood dan memberi kebahagiaan sepanjang hari.", "steps": ["Masukan 1 kantong celup KulitYea ke dalam cangkir", "Tuangkan air panas ke dalam cangkir (\u00b1200ml)", "Diamkan selama 3 - 5 menit agar aroma dan nutrisi terekstraksi optimal", "Nikmati selagi hangat untuk relaksasi tubuh dan pikiran"], "ingredients": "Kulit Jeruk Pilihan (100% Alami)", "producer": "Tim LakuDong!, Bandung - Indonesia", "storage": "Simpan di tempat kering, sejuk, dan terhindar dari sinar matahari langsung."}, "dragonfruit": {"title": "KulitYea \u2014 Tropical Dragon Fruit", "icon": "\ud83c\udf3a", "color": "#C41263", "badge": "Teh Ekstrak Kulit Buah Naga", "dieline_img": "textures/dragonfruit_dieline.png", "p1": "Tropical Dragon Fruit kami adalah perayaan kebaikan alam yang diperbarui. Diracik cermat dari kulit Buah Naga pilihan yang dikeringkan, menghadirkan seduhan herbal kaya antioksidan dan ramah lingkungan. Rayakan siklus alam dan nikmati kesegaran tropis di setiap cangkir.", "p2": "Berawal dari kepedulian terhadap ratusan ribu ton kulit buah yang terbuang sia-sia, KulitYea mengolah kembali kulit buah pilihan menjadi seduhan herbal fungsional kaya antioksidan. Setiap cangkir yang kamu nikmati turut mendukung petani lokal dan mengurangi emisi di bumi kita.", "fact_title": "Tahukah kamu? \ud83c\udf3a", "fact_body": "Rona merah muda alami pada teh ini 100% berasal dari ekstrak kulit buah naga! Selain memberikan rasa yang super lembut, nutrisinya siap membangkitkan mood dan menjaga vitalitasmu dari pagi hingga malam.", "steps": ["Masukan 1 kantong celup KulitYea ke dalam cangkir", "Tuangkan air panas ke dalam cangkir (\u00b1200ml)", "Diamkan selama 3 - 5 menit agar aroma terekstraksi optimal", "Nikmati selagi hangat"], "ingredients": "Kulit Buah Naga Pilihan (100% Alami)", "producer": "Tim LakuDong!, Bandung - Indonesia", "storage": "Simpan di tempat kering dan sejuk."}, "mangosteen": {"title": "KulitYea \u2014 Tropical Mangosteen", "icon": "\ud83c\udf47", "color": "#651A85", "badge": "Teh Ekstrak Kulit Manggis", "dieline_img": "textures/mangosteen_dieline.png", "p1": "Tropical Mangosteen kami adalah perayaan kebaikan alam yang diperbarui. Diracik cermat dari kulit Manggis pilihan yang dikeringkan, menghadirkan seduhan herbal kaya antioksidan dan ramah lingkungan. Rayakan siklus alam dan nikmati kesegaran tropis di setiap cangkir.", "p2": "Berawal dari kepedulian terhadap ratusan ribu ton kulit buah yang terbuang sia-sia, KulitYea mengolah kembali kulit buah pilihan menjadi seduhan herbal fungsional kaya antioksidan. Setiap cangkir yang kamu nikmati turut mendukung petani lokal dan mengurangi emisi di bumi kita.", "fact_title": "Tahukah kamu? \ud83c\udf47", "fact_body": "Rona ungu gelap alami pada teh ini 100% berasal dari ekstrak kulit manggis pilihan! Nutrisi alaminya siap meningkatkan sistem kekebalan tubuh dan menjaga kesehatan kulitmu dari dalam.", "steps": ["Masukan 1 kantong celup KulitYea ke dalam cangkir", "Tuangkan air panas ke dalam cangkir (\u00b1200ml)", "Diamkan selama 3 - 5 menit agar aroma terekstraksi optimal", "Nikmati selagi hangat"], "ingredients": "Kulit Manggis Pilihan (100% Alami)", "producer": "Tim LakuDong!, Bandung - Indonesia", "storage": "Simpan di tempat kering dan sejuk."}, "salak": {"title": "KulitYea \u2014 Tropical Snakeskin Fruit", "icon": "\ud83c\udf30", "color": "#735346", "badge": "Teh Ekstrak Kulit Salak", "dieline_img": "textures/salak_dieline.png", "p1": "Tropical SnakeSkin Fruit kami adalah perayaan kebaikan alam yang diperbarui. Diracik cermat dari kulit Salak pilihan yang dikeringkan, menghadirkan seduhan herbal kaya antioksidan dan ramah lingkungan. Rayakan siklus alam dan nikmati kesegaran tropis di setiap cangkir.", "p2": "Berawal dari kepedulian terhadap ratusan ribu ton kulit buah yang terbuang sia-sia, KulitYea mengolah kembali kulit buah pilihan menjadi seduhan herbal fungsional kaya antioksidan. Setiap cangkir yang kamu nikmati turut mendukung petani lokal dan mengurangi emisi di bumi kita.", "fact_title": "Tahukah kamu? \ud83c\udf30", "fact_body": "Aroma unik alami pada teh ini 100% berasal dari ekstrak kulit salak asli! Selain memberikan rasa sedikit manis dan kaya, nutrisi alaminya siap menjaga kesehatan pencernaan dan memberikan rasa nyaman sepanjang hari.", "steps": ["Masukan 1 kantong celup KulitYea ke dalam cangkir", "Tuangkan air panas ke dalam cangkir (\u00b1200ml)", "Diamkan selama 3 - 5 menit agar aroma terekstraksi optimal", "Nikmati selagi hangat"], "ingredients": "Kulit Salak Pilihan (100% Alami)", "producer": "Tim LakuDong!, Bandung - Indonesia", "storage": "Simpan di tempat kering dan sejuk."}};
     let curVariant = 'orange';
     let autoRotate = false;
     let isMaximized = false;
@@ -245,23 +250,24 @@
     renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 
     const scene = new THREE.Scene();
-    scene.background = new THREE.Color(0x0f172a);
+    scene.background = new THREE.Color(0x0b1120);
 
-    const camera = new THREE.PerspectiveCamera(40, window.innerWidth / window.innerHeight, 0.1, 100);
-    camera.position.set(0.65, 0.45, 1.4);
+    // Product photography lens: FOV 34 for minimal distortion
+    const camera = new THREE.PerspectiveCamera(34, window.innerWidth / window.innerHeight, 0.1, 100);
+    camera.position.set(0.55, 0.35, 1.05);
 
     const controls = new THREE.OrbitControls(camera, canvas);
     controls.enableDamping = true;
     controls.dampingFactor = 0.05;
-    controls.maxDistance = 3.5;
-    controls.minDistance = 0.5;
+    controls.maxDistance = 2.8;
+    controls.minDistance = 0.45;
     controls.target.set(0, 0, 0);
 
     // Studio Lights
-    const ambientLight = new THREE.AmbientLight(0xffffff, 0.7);
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.85);
     scene.add(ambientLight);
 
-    const keyLight = new THREE.DirectionalLight(0xfff7ed, 1.2);
+    const keyLight = new THREE.DirectionalLight(0xfff7ed, 1.25);
     keyLight.position.set(2, 3, 2.5);
     keyLight.castShadow = true;
     keyLight.shadow.mapSize.width = 2048;
@@ -269,17 +275,17 @@
     keyLight.shadow.bias = -0.0001;
     scene.add(keyLight);
 
-    const fillLight = new THREE.DirectionalLight(0xe0f2fe, 0.6);
+    const fillLight = new THREE.DirectionalLight(0xe0f2fe, 0.65);
     fillLight.position.set(-2, 1.5, 2);
     scene.add(fillLight);
 
-    const rimLight = new THREE.DirectionalLight(0xffffff, 0.8);
+    const rimLight = new THREE.DirectionalLight(0xffffff, 0.85);
     rimLight.position.set(0, 2, -2.5);
     scene.add(rimLight);
 
     // Studio Floor Pedestal & Shadow
     const floorGeo = new THREE.CylinderGeometry(1.2, 1.2, 0.02, 64);
-    const floorMat = new THREE.MeshStandardMaterial({ color: 0x1e293b, roughness: 0.4, metalness: 0.1 });
+    const floorMat = new THREE.MeshStandardMaterial({ color: 0x162032, roughness: 0.4, metalness: 0.1 });
     const floor = new THREE.Mesh(floorGeo, floorMat);
     floor.position.y = -0.52;
     floor.receiveShadow = true;
@@ -293,7 +299,7 @@
     const texLoader = new THREE.TextureLoader();
 
     function loadHQTex(url) {
-      const t = texLoader.load(url);
+      const t = texLoader.load(url + '?v=4');
       t.anisotropy = maxAnisotropy;
       t.minFilter = THREE.LinearMipmapLinearFilter;
       t.magFilter = THREE.LinearFilter;
@@ -302,16 +308,15 @@
     }
 
     let boxMesh = null;
-    let materialsMap = {};
 
     function initBox() {
       const mats = [
-        new THREE.MeshStandardMaterial({ map: loadHQTex('textures/orange_side_right_hd.png'), roughness: 0.45 }), // +X Right
-        new THREE.MeshStandardMaterial({ map: loadHQTex('textures/orange_side_left_hd.png'), roughness: 0.45 }),  // -X Left
-        new THREE.MeshStandardMaterial({ map: loadHQTex('textures/orange_top_hd.png'), roughness: 0.45 }),        // +Y Top
-        new THREE.MeshStandardMaterial({ map: loadHQTex('textures/orange_bottom_hd.png'), roughness: 0.45 }),     // -Y Bottom
-        new THREE.MeshStandardMaterial({ map: loadHQTex('textures/orange_front_hd.png'), roughness: 0.45 }),      // +Z Front
-        new THREE.MeshStandardMaterial({ map: loadHQTex('textures/orange_back_hd.png'), roughness: 0.45 })       // -Z Back
+        new THREE.MeshStandardMaterial({ map: loadHQTex('textures/orange_side_right_hd.png'), roughness: 0.35 }), // +X Right
+        new THREE.MeshStandardMaterial({ map: loadHQTex('textures/orange_side_left_hd.png'), roughness: 0.35 }),  // -X Left
+        new THREE.MeshStandardMaterial({ map: loadHQTex('textures/orange_top_hd.png'), roughness: 0.35 }),        // +Y Top
+        new THREE.MeshStandardMaterial({ map: loadHQTex('textures/orange_bottom_hd.png'), roughness: 0.35 }),     // -Y Bottom
+        new THREE.MeshStandardMaterial({ map: loadHQTex('textures/orange_front_hd.png'), roughness: 0.35 }),      // +Z Front
+        new THREE.MeshStandardMaterial({ map: loadHQTex('textures/orange_back_hd.png'), roughness: 0.35 })       // -Z Back
       ];
 
       boxMesh = new THREE.Mesh(boxGeo, mats);
@@ -426,15 +431,15 @@
       if (theme === 'light') {
         scene.background.set(0xf1f5f9);
         floor.material.color.set(0xe2e8f0);
-        ambientLight.intensity = 0.9;
+        ambientLight.intensity = 1.0;
       } else if (theme === 'warm') {
-        scene.background.set(0x27170c);
-        floor.material.color.set(0x3a2313);
-        ambientLight.intensity = 0.8;
+        scene.background.set(0x24140a);
+        floor.material.color.set(0x381f10);
+        ambientLight.intensity = 0.9;
       } else {
-        scene.background.set(0x0f172a);
-        floor.material.color.set(0x1e293b);
-        ambientLight.intensity = 0.7;
+        scene.background.set(0x0b1120);
+        floor.material.color.set(0x162032);
+        ambientLight.intensity = 0.85;
       }
     }
 
@@ -455,9 +460,9 @@
       }
 
       if (targetPos) {
-        camera.position.lerp(targetPos, 0.08);
-        controls.target.lerp(new THREE.Vector3(0, 0, 0), 0.08);
-        if (camera.position.distanceTo(targetPos) < 0.01) {
+        camera.position.lerp(targetPos, 0.09);
+        controls.target.lerp(new THREE.Vector3(0, 0, 0), 0.09);
+        if (camera.position.distanceTo(targetPos) < 0.005) {
           targetPos = null;
         }
       }
